@@ -48,6 +48,13 @@
                 </div>
             </div>
         </div>
+        <div class="underline"></div>
+        <h5 class="mb-3" style="padding: 25px 0 0 25px;">분배</h5>
+        <div class="prices">
+            <div class="price-input" v-for="(i, index) in boss">
+                {{i}} {{total[i]}}
+            </div>
+        </div>
     </div>
 </body>
 <script>
@@ -76,16 +83,19 @@
               return exist;
           },
           total () {
-              const exist = {}
+              const tot = {}
               if(this.count.lucid.addcube){
                 for(let i in this.count){
+                    var bunbae = 0
                     for(let j in this.count[i]){
-                        console.log(this.count[i][j], j)
-                        if(this.count[i][j] > 0 && !exist[j]) exist[j] = true
+                        console.log(this.price[j])
+                        bunbae += (this.count[i][j]*(this.price[j] || this.price[j] == ""?0:this.price[j]))
+                        console.log(this.count[i][j],(this.price[j]?0:this.price[j]))
                     }
+                    tot[i] = bunbae
                 }
               }
-              return exist;
+              return tot;
           }
       },
       methods:{
