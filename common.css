@@ -1,0 +1,57 @@
+#dist{
+    width:100%;
+    display: flex;
+    flex-direction: column;
+}
+.prices{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 25px;
+}
+.price-input{
+    width: 45%;
+    margin-bottom: 10px;
+}
+.underline{
+    margin: 10px;
+    background: gray;
+    height: 1px;
+}
+.boss{
+    padding: 25px
+}
+.bossItem{
+    width: 100%;
+    background: #f1f1f1;
+}
+.row{
+    --bs-gutter-x: 0;
+}
+.col{
+    border: 1px solid gray;
+}
+.last{
+    border-bottom: 2px solid black;
+}
+.num{
+    display: flex;
+    justify-content: center;
+}
+
+.num div{
+    width: 100%
+}
+.num div:nth-child(1){
+    border-right: 1px solid black;
+}
+.num div:nth-child(2){
+    background: white;
+}
+.num div:nth-child(3){
+    border-left: 1px solid black;
+}
+.exist{
+    background: #cafaca;
+}
