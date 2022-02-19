@@ -19,8 +19,9 @@
     background: gray;
     height: 1px;
 }
-.boss{
-    padding: 25px
+.boss, .eq{
+    padding: 25px;
+    font-size: 0.875rem;
 }
 .bossItem{
     width: 100%;
@@ -34,6 +35,10 @@
 }
 .last{
     border-bottom: 2px solid black;
+}
+.unit{
+    color: #dc3545;
+    font-size: .8rem;
 }
 .num{
     display: flex;
@@ -54,4 +59,42 @@
 }
 .exist{
     background: #cafaca;
+}
+.eq-item div select{
+    width: 30% !important;
+}
+.eq-item div select, .eq-item div input{
+    font-size: 0.875rem;
+}
+.eq-price{
+    width: 40% !important;
+}
+.eq-num{
+    width: 15% !important;
+}
+.total-box{
+    width:100%;
+    display: flex;
+    font-size: 0.875rem;
+}
+.total-box div:nth-child(1){
+    width: 35%;
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    padding: 5px;
+}
+.total-box.exist div:nth-child(1) {
+    background: #2a955a;
+    color: white;
+    border: 1px solid black;
+    font-weight: 600;
+}
+.total-box div:nth-child(2){
+    padding: 5px 15px 5px 15px;
+    width: 65%;
+    border: 1px solid #ced4da;
+}
+.total-box.real-total{
+    border: 3px solid;
+    font-weight: 600;
 }
