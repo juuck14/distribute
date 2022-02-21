@@ -1,4 +1,13 @@
-#dist{
+@font-face {
+    font-family: 'maplestory';
+    src: url('./font/Maplestory\ Light.ttf') format('truetype');
+    font-style: normal;
+    font-weight: normal;
+} 
+body{
+    font-family: 'maplestory'
+}
+#dist, #me{
     width:100%;
     display: flex;
     flex-direction: column;
@@ -25,6 +34,17 @@
 .bossItem{
     width: 100%;
     background: #f1f1f1;
+}
+.icon{
+    background-size: contain !important;
+}
+.icon.icon_1{
+    background-size: auto 28px !important;
+    height:32px;
+}
+.icon_2{
+    width: 28px;
+    height: 28px;
 }
 .row{
     --bs-gutter-x: 0;
@@ -59,6 +79,27 @@
 .exist{
     background: #cafaca;
 }
+.eq-name{
+    width:50%;
+    float: left;
+    position:relative;
+    margin: 15px 0 15px 0;
+}
+.eq-name-input{
+    border: none;
+    font-size: 1rem !important;
+    width: 100%;
+    border-bottom: 1px solid gray;
+}
+.eq-name-input:focus-visible{
+    outline: none;
+}
+.eq-edit{
+    position: absolute;
+    height: 27px;
+    right: 5px;
+    line-height: 27px;
+}
 .eq-item div select{
     width: 30% !important;
 }
@@ -70,6 +111,15 @@
 }
 .eq-num{
     width: 15% !important;
+}
+.round{
+    float: right;
+
+}
+.round-label{
+    font-size: 1rem;
+    text-align: right;
+    margin-bottom: 10px;
 }
 .total-box{
     width:100%;
