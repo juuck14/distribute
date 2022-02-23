@@ -12,6 +12,16 @@ body{
 select option[value=""][disabled] {
 	display: none;
 }
+.head{
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+.author{
+    text-align: right;
+    font-size: 0.9rem;
+    margin-bottom: 70px;
+}
 .btn-info{
     color: white !important;
 }

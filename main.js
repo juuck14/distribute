@@ -39,8 +39,8 @@ var dist = new Vue({
             "노멀 윌",
             "노멀 더스크",
             "노멀 듄켈",
-            "하드 스우",
             "하드 데미안",
+            "하드 스우",
             "하드 루시드",
             "하드 윌",
             "카오스 가디언 엔젤 슬라임",
@@ -102,7 +102,6 @@ var dist = new Vue({
             cache: false,
             get() {
                 const tot = {};
-                console.log(this.count)
                 if (Object.keys(this.count).length > 0) {
                     for (let i in this.count) {
                         var bunbae = 0;
@@ -122,22 +121,23 @@ var dist = new Vue({
                 }
                 for (let i of this.eqs) {
                     var bunbae = 0;
-                    if (i.price != "" && i.num != "") {
+                    if (i.price && i.num && i.price != "" && i.num != "") {
                         bunbae += i.price * this.getDiv(i.num, i.fee);
                     }
-                    if(this.eqIncludes === 'Y'){
-                        tot[i.boss] = {
-                            ...tot[i.boss],
-                            total: bunbae + (tot[i.boss]?tot[i.boss].total:0)
-                        };
-                    } else{
-                        tot['eq' + i.index] = {
-                            name: i.tag,
-                            total: bunbae,
-                            boss: i.boss
-                        };
+                    if(i.boss && i.price && i.num && i.boss != "" && i.price != "" && i.num != ""){
+                        if(this.eqIncludes === 'Y'){
+                            tot[i.boss] = {
+                                name: i.boss,
+                                total: bunbae + (tot[i.boss]?tot[i.boss].total:0)
+                            };
+                        } else{
+                            tot['eq' + i.index] = {
+                                name: i.tag,
+                                total: bunbae,
+                                boss: i.boss
+                            };
+                        }
                     }
-    
                 }
                 return tot;
             }
@@ -169,6 +169,9 @@ var dist = new Vue({
             },
             deep: true
         },
+        fee(val, oldVal) {
+            localStorage["fee"] = val;
+        }, 
         price: {
             handler(val, oldVal) {
                 localStorage["price"] = JSON.stringify(val);
@@ -189,7 +192,6 @@ var dist = new Vue({
         },
         count: {
             handler(val, oldVal) {
-                console.log('cnt')
                 localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
@@ -231,11 +233,17 @@ var dist = new Vue({
             var cnt = {};
             for (let i of this.items) {
                 if (i === "addcube") {
-                    if (boss === "루시드") cnt[i] = 9;
-                    else if (boss === "윌") cnt[i] = 9;
-                    else if (boss === "스데듄") cnt[i] = 36;
-                    else if (boss === "더슬") cnt[i] = 19;
-                    else cnt[i] = 0
+                    if (["노멀 스우","노멀 데미안","노멀 가디언 엔젤 슬라임","이지 루시드"].includes(boss)) cnt[i] = 3;
+                    else if (["이지 윌","노멀 루시드"].includes(boss)) cnt[i] = 4;
+                    else if (["노멀 윌"].includes(boss)) cnt[i] = 5;
+                    else if (["노멀 더스크","노멀 듄켈"].includes(boss)) cnt[i] = 6;
+                    else if (["하드 데미안"].includes(boss)) cnt[i] = 7;
+                    else if (["하드 스우"].includes(boss)) cnt[i] = 8;
+                    else if (["하드 스우","하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) cnt[i] = 9;
+                    else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) cnt[i] = 10;
+                    else if (["하드 세렌"].includes(boss)) cnt[i] = 11;
+                    else if (["검은 마법사"].includes(boss)) cnt[i] = 30;
+                    else cnt[i] = 0;
                 } else cnt[i] = 0;
             }
             return cnt
@@ -350,6 +358,9 @@ var dist = new Vue({
     created() {
         if (localStorage.getItem("boss")) {
             this.boss = JSON.parse(localStorage.getItem("boss"));
+        }
+        if (localStorage.getItem("fee")) {
+            this.fee = localStorage.getItem("fee")
         }
         if (localStorage.getItem("price")) {
             this.price = JSON.parse(localStorage.getItem("price"));
