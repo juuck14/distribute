@@ -2,6 +2,7 @@
 var dist = new Vue({
     el: "#dist",
     data: {
+        fee:5,
         price: {},
         selected: [],
         people: {},
@@ -29,31 +30,35 @@ var dist = new Vue({
         boss: [
         ],
         bossList: [
-            "노멀 데미안",
             "노멀 스우",
+            "노멀 데미안",
             "노멀 가디언 엔젤 슬라임",
             "이지 루시드",
             "이지 윌",
             "노멀 루시드",
             "노멀 윌",
-            "노멀 거대 괴수 더스크",
-            "노멀 친위대장 듄켈",
+            "노멀 더스크",
+            "노멀 듄켈",
             "하드 스우",
             "하드 데미안",
-            "카오스 가디언 엔젤 슬라임",
             "하드 루시드",
             "하드 윌",
-            "카오스 거대 괴수 더스크",
+            "카오스 가디언 엔젤 슬라임",
             "노멀 진 힐라",
-            "하드 친위대장 듄켈",
+            "카오스 더스크",
+            "하드 듄켈",
             "하드 진 힐라",
-            "노멀 선택받은 세렌",
-            "하드 선택받은 세렌",
-            "카오스 감시자 칼로스",
-            " 검은 마법사"
-        ]
+            "노멀 세렌",
+            "하드 세렌",
+            "카오스 칼로스",
+            "검은 마법사"
+        ],
+        eqIncludes: 'Y'
     },
     computed: {
+        me() {
+            return this.eqs[0] && this.eqs[0].tag === '장비1미'?true:false
+        },
         existYn() {
             const exist = {};
             if (Object.keys(this.count).length > 0) {
@@ -93,41 +98,49 @@ var dist = new Vue({
             }
             return tot;
         },
-        totalEach() {
-            const tot = {};
-            if (Object.keys(this.count).length > 0) {
-                for (let i in this.count) {
-                    var bunbae = 0;
-                    for (let j in this.count[i]) {
-                        bunbae +=
-                            this.count[i][j] *
-                            (this.price[j] || this.price[j] == ""
-                                ? this.price[j]
-                                : 0);
+        totalEach: {
+            cache: false,
+            get() {
+                const tot = {};
+                console.log(this.count)
+                if (Object.keys(this.count).length > 0) {
+                    for (let i in this.count) {
+                        var bunbae = 0;
+                        for (let j in this.count[i]) {
+                            bunbae +=
+                                this.count[i][j] *
+                                (this.price[j] || this.price[j] == ""
+                                    ? this.price[j]
+                                    : 0);
+                        }
+                        bunbae *= this.getDiv(this.people[i]);
+                        tot[i] = {
+                            name: i,
+                            total: bunbae,
+                        };
                     }
-                    bunbae *= this.getDiv(this.people[i]);
-                    tot[i] = {
-                        name: i,
-                        total: bunbae,
-                    };
-                }
-                var n = {};
-                for (let i of this.boss) {
-                    n[i] = 1;
                 }
                 for (let i of this.eqs) {
                     var bunbae = 0;
                     if (i.price != "" && i.num != "") {
-                        bunbae += i.price * this.getDiv(i.num);
+                        bunbae += i.price * this.getDiv(i.num, i.fee);
                     }
-                    tot['eq' + i.index] = {
-                        name: i.tag,
-                        total: bunbae,
-                    };
-                    n[i.boss] += 1;
+                    if(this.eqIncludes === 'Y'){
+                        tot[i.boss] = {
+                            ...tot[i.boss],
+                            total: bunbae + (tot[i.boss]?tot[i.boss].total:0)
+                        };
+                    } else{
+                        tot['eq' + i.index] = {
+                            name: i.tag,
+                            total: bunbae,
+                            boss: i.boss
+                        };
+                    }
+    
                 }
+                return tot;
             }
-            return tot;
         },
         realTotal() {
             var sum = 0;
@@ -139,18 +152,22 @@ var dist = new Vue({
         },
     },
     watch: {
-        boss(val, oldVal) {
-            let del = Object.keys(this.people).filter(a => !val.includes(a))
-            if (del.length > 0) {
-                delete this.people[del[0]]
-            }
-            let add = val.filter(a => !Object.keys(this.people).includes(a))
-            if (add.length > 0) {
-                this.people = {
-                    ...this.people,
-                    [add[0]]: 6
+        boss: {
+            handler(val, oldVal) {
+                let del = Object.keys(this.people).filter(a => !val.includes(a))
+                if (del.length > 0) {
+                    delete this.people[del[0]]
                 }
-            }
+                let add = val.filter(a => !Object.keys(this.people).includes(a))
+                if (add.length > 0) {
+                    this.people = {
+                        ...this.people,
+                        [add[0]]: 6
+                    }
+                }
+                localStorage["boss"] = JSON.stringify(val);
+            },
+            deep: true
         },
         price: {
             handler(val, oldVal) {
@@ -170,30 +187,62 @@ var dist = new Vue({
             },
             deep: true,
         },
+        count: {
+            handler(val, oldVal) {
+                console.log('cnt')
+                localStorage["count"] = JSON.stringify(val);
+            },
+            deep: true,
+        },
     },
     methods: {
         addboss(val) {
             if (this.boss.includes(val)) {
 
             } else {
-                var cnt = {};
-                for (let j of this.items) {
-                    if (j === "addcube") {
-                        if (val === "루시드") cnt[j] = 9;
-                        else if (val === "윌") cnt[j] = 9;
-                        else if (val === "스데듄") cnt[j] = 36;
-                        else if (val === "더슬") cnt[j] = 19;
-                        else cnt[j] = 0
-                    } else cnt[j] = 0;
+                this.count = {
+                    ...this.count,
+                    [val]: this.resetCount(val)
                 }
-                this.count[val] = cnt;
                 this.boss.push(val)
 
             }
         },
-        reset() {
-            localStorage.clear();
-            location.reload();
+        reset(type, boss="") {
+            if(type === 'all'){
+                localStorage.clear();
+                location.reload();
+            } else if(type === 'boss'){
+                this.count = {
+                    ...this.count,
+                    [boss]: this.resetCount(boss)
+                }
+/*             } else if(){
+
+            } else if(){
+
+            } else if(){
+ */
+            } else{
+                
+            }
+        },
+        resetCount(boss){
+            var cnt = {};
+            for (let i of this.items) {
+                if (i === "addcube") {
+                    if (boss === "루시드") cnt[i] = 9;
+                    else if (boss === "윌") cnt[i] = 9;
+                    else if (boss === "스데듄") cnt[i] = 36;
+                    else if (boss === "더슬") cnt[i] = 19;
+                    else cnt[i] = 0
+                } else cnt[i] = 0;
+            }
+            return cnt
+        },
+        deleteBoss(boss){
+            this.boss = this.boss.filter(a=>a!=boss)
+            delete this.count[boss]
         },
         numChange(type, i, j, k) {
             if (this.count) {
@@ -212,7 +261,6 @@ var dist = new Vue({
                     },
                 };
             }
-            localStorage["count"] = JSON.stringify(this.count);
         },
         getUnit(n) {
             n = n.toString();
@@ -238,7 +286,7 @@ var dist = new Vue({
         getTotal(arr) {
             var total = 0;
             for (let i of arr) {
-                total += this.total[i];
+                total += this.total[i]?this.total[i]:0;
             }
             return this.getFormat(total);
         },
@@ -248,8 +296,8 @@ var dist = new Vue({
                 .toString()
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         },
-        getDiv(n) {
-            return 95 / (100 * n - 5);
+        getDiv(n, fee=this.fee) {
+            return (100-fee) / (100 * n - 5);
         },
         peopleChange(type, i) {
             if (this.people) {
@@ -264,7 +312,7 @@ var dist = new Vue({
         },
         addeq() {
             this.eqs.push({
-                boss: this.boss[0],
+                boss: this.boss[0]?this.boss[0]:"",
                 price: "",
                 num: this.people[this.boss[0]],
                 tag:
@@ -281,10 +329,17 @@ var dist = new Vue({
                             total > value.index ? total : value.index,
                         0
                     ) + 1,
+                fee: this.fee
             });
+        },
+        changeEqBoss(val, i){
+            this.eqs[i].num = this.people[val]?this.people[val]:this.eqs[i].num
         },
         deleq(i) {
             this.eqs.splice(i, 1);
+        },
+        changeEqIncludes() {
+            this.selected = []
         },
         toggle(k) {
             if (this.selected.includes(k)) {
@@ -293,6 +348,9 @@ var dist = new Vue({
         },
     },
     created() {
+        if (localStorage.getItem("boss")) {
+            this.boss = JSON.parse(localStorage.getItem("boss"));
+        }
         if (localStorage.getItem("price")) {
             this.price = JSON.parse(localStorage.getItem("price"));
         }
@@ -306,16 +364,7 @@ var dist = new Vue({
             this.count = JSON.parse(localStorage.getItem("count"));
         } else {
             for (let i of this.boss) {
-                var cnt = {};
-                for (let j of this.items) {
-                    if (j === "addcube") {
-                        if (i === "루시드") cnt[j] = 9;
-                        else if (i === "윌") cnt[j] = 9;
-                        else if (i === "스데듄") cnt[j] = 36;
-                        else if (i === "더슬") cnt[j] = 19;
-                    } else cnt[j] = 0;
-                }
-                this.count[i] = cnt;
+                this.count[i] = this.resetCount(i);
             }
         }
     },

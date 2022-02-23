@@ -12,8 +12,11 @@ body{
 select option[value=""][disabled] {
 	display: none;
 }
+.btn-info{
+    color: white !important;
+}
 .watermark{
-    height: calc(100vh - 120px);
+    height: 20vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,9 +55,38 @@ select option[value=""][disabled] {
     background: gray;
     height: 1px;
 }
+.section_xs{
+    font-size: 0.5rem;
+}
 .section_small{
     font-size: 0.875rem;
 }
+.section_normal{
+    font-size: 1rem;
+}
+.tag{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.tag-left{
+    display: flex;
+    flex-direction: column;
+}
+.people{
+    display: flex;
+    border: 1px solid #ced4da;
+    margin-left: 10px;
+    border-radius: 11px;
+}
+.people div{
+    padding: 2px 7px
+}
+.people div:nth-child(2){
+    width: 23px;
+    text-align: center;
+}
+
 .bossItem{
     width: 100%;
     background: #f1f1f1;
@@ -82,6 +114,8 @@ select option[value=""][disabled] {
 .unit{
     color: #dc3545;
     font-size: .8rem;
+    float: left;
+    margin-left: 0.75rem;
 }
 .num{
     display: flex;
@@ -103,11 +137,14 @@ select option[value=""][disabled] {
 .exist{
     background: #cafaca;
 }
-.eq-name{
-    width:50%;
-    float: left;
-    position:relative;
+.eq-tag{
+    width:100%;
     margin: 15px 0 15px 0;
+}
+.eq-name{
+    position:relative;
+    width: 50%;
+    float: left;
 }
 .eq-name-input{
     border: none;
@@ -125,21 +162,41 @@ select option[value=""][disabled] {
     right: 5px;
     line-height: 27px;
 }
-.eq-item div select{
-    width: 30% !important;
+.remove-circle{
+    padding: 0;
+    width: 25px !important;
+    height: 25px;
+    border-radius: 20px;
+}
+.eq-item div select:nth-child(1){
+    width: 50% !important;
+    border-radius: 0.25rem 0 0 0;
 }
 .eq-item div select, .eq-item div input{
     font-size: 0.875rem;
 }
 .eq-price{
-    width: 40% !important;
+    border-top: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+}
+.eq-fee{
+    width: 25% !important;
 }
 .eq-num{
-    width: 15% !important;
+    width: 25% !important;
+    border-radius: 0 0.25rem 0 0;
 }
 .float-right{
     float: right;
 
+}
+.radio-label{
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+.radio-label input{
+    margin-left: 3px;
 }
 .select-label{
     font-size: 1rem;
@@ -164,7 +221,9 @@ select option[value=""][disabled] {
     font-weight: 600;
 }
 .total-box div:nth-child(2){
-    padding: 5px 15px 5px 15px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
     width: 65%;
     border: 1px solid #ced4da;
 }

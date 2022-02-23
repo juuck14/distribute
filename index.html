@@ -20,23 +20,52 @@
         <div>
             <span class="float-left">
                 <div class="mb-2">보스 추가</div>
-                <select class="form-select" @change="addboss(event.target.value)">
+                <select class="form-select mb-3" @change="addboss(event.target.value)">
                     <option value="" disabled selected>보스 추가하기</option>
                     <option v-for="i in bossList">{{i}}</option>
+                </select>
+                <div class="mb-2">경매장 수수료</div>
+                <select class="form-select w-auto" v-model="fee">
+                    <option value="5">5%</option>
+                    <option value="3">3%</option>
                 </select>
             </span>
             
             <span class="float-right">
-                <button type="button" class="btn btn-danger" @click="reset">
+                <button type="button" class="btn btn-info section_small" @click="reset('all')">
                     초기화
                 </button>
             </span>
         </div>
+        <div class="underline"></div>
+        <h5 class="mb-4">보스</h5>
         <div v-if="boss.length > 0">
-            <div class="underline" style="opacity: 0"></div>
             <div class="section_small">
                 <div class="boss-input" v-for="i in boss">
-                    <h5 class="mb-3">{{i}}</h5>
+                    <div class="tag mb-3">
+                        <div class="tag-left">
+                            <div class="section_normal">
+                                {{i}}
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                인원수
+                                <div class="people">
+                                    <div @click="peopleChange(-1, i)"><i class="fa-solid fa-minus"></i></div>
+                                    <div>{{people[i]}}</div>
+                                    <div @click="peopleChange(1, i)"><i class="fa-solid fa-plus"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-info section_small" @click="reset('boss', i)">
+                                초기화
+                            </button>
+                            <button type="button" class="btn btn-danger section_small" @click="deleteBoss(i)">
+                                삭제
+                            </button>
+                        </div>
+
+                    </div>
                     <div class="bossItem text-center mb-5">
                         <div v-for="j in 4">
                             <div class="row">
@@ -74,116 +103,120 @@
                     </div>
                 </div>
             </div>
-            <div class="underline"></div>
-            <div class="section_small">
-                <div class="boss-input">
-                    <h5 class="mb-3">인원수</h5>
-                    <div class="bossItem text-center mb-3">
-                        <div>
-                            <div class="row">
-                                <div class="col" v-for="i in boss">
-                                    {{i}}
-                                </div>
-                            </div>
-                            <div class="row last">
-                                <div class="num col" v-for="i in boss">
-                                    <div @click="peopleChange(-1, i)"><i class="fa-solid fa-minus"></i></div>
-                                    <div>{{people[i]}}</div>
-                                    <div @click="peopleChange(1, i)"><i class="fa-solid fa-plus"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="underline"></div>
-            <div class="section_small eq">
-                <div class="eq-input">
-                    <h5 class="mb-3">장비</h5>
-                    <div class="eq-item text-center mb-3" v-for="(eq, index) in eqs">
-                        <div class="eq-name">
-                            <label class="w-100">
-                                <span class="eq-edit"><i class="fa-solid fa-pen"></i></span>
-                                <input type="text" class="eq-name-input" v-model="eqs[index].tag" />
-                            </label>
-                        </div>
-                        <div class="input-group mb-2">
-                            <select class="form-select" v-model="eqs[index].boss">
-                                <option v-for="i in boss" :value="i">
-                                    {{i}}
-                                </option>
-                            </select>
-                            <input type="number" class="form-control eq-price" placeholder="가격"
-                                v-model="eqs[index].price" />
-                            <input type="number" class="form-control eq-num" placeholder="인원"
-                                v-model="eqs[index].num" />
-                            <button type="button" class="btn btn-danger form-control" @click="deleq(index)">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                        <div class="unit" v-if="eqs[index].price && eqs[index].price.length > 0">
-                            {{getUnit(eqs[index].price)}}
-                        </div>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-primary form-control" @click="addeq">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="underline"></div>
-            <h5 class="mb-3">
-                분배
-                <span class="float-right">
-                    <div class="select-label">반올림</div>
-                    <select class="form-select" v-model="round">
-                        <option v-for="i in 8">{{10**(i-1)}}</option>
-                    </select>
-                </span>
-            </h5>
-            <div>
-                <div class="total-box">
-                    <div class="text-center">챤</div>
-                    <div>{{getTotal(['루시드'])}}</div>
-                </div>
-                <div class="total-box">
-                    <div class="text-center">문겐</div>
-                    <div>{{getTotal(['더슬'])}}</div>
-                </div>
-                <div class="total-box">
-                    <div class="text-center">숍님</div>
-                    <div>{{getTotal(['스데듄', '더슬'])}}</div>
-                </div>
-                <div class="total-box">
-                    <div class="text-center">앙크</div>
-                    <div>{{getTotal(['루시드', '윌', '더슬'])}}</div>
-                </div>
-                <div class="total-box">
-                    <div class="text-center">나머지</div>
-                    <div>
-                        {{getTotal(['루시드', '윌', '스데듄', '더슬'])}}
-                    </div>
-                </div>
-            </div>
-            <div class="underline"></div>
-            <h5 class="mb-3">각각</h5>
-            <div>
-                <div :class="'total-box '+(selected.includes(key)?'exist':'')" v-for="(value, key) in totalEach"
-                    @click="toggle(key)">
-                    <div class="text-center">{{value.name}}</div>
-                    <div>{{getFormat(value.total)}}</div>
-                </div>
-                <div class="total-box real-total">
-                    <div class="text-center">총합</div>
-                    <div>{{getFormat(realTotal)}}</div>
-                </div>
-            </div>
         </div>
         <div v-if="boss.length == 0" class="watermark">
             <div class="aing"></div>
             <div>보스를 추가해 주세요.</div>
         </div>
+        <div class="underline"></div>
+        <div class="section_small eq">
+            <div class="eq-input">
+                <h5 class="mb-3">장비</h5>
+                <div class="eq-item text-center mb-5" v-for="(eq, index) in eqs">
+                    <div class="eq-tag">
+                        <label class="eq-name mb-3">
+                            <span class="eq-edit"><i class="fa-solid fa-pen"></i></span>
+                            <input type="text" class="eq-name-input" v-model="eqs[index].tag" />
+                        </label>
+                        <button type="button" class="float-end w-auto btn btn-outline-danger remove-circle form-control" @click="deleq(index)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <select class="form-select" v-model="eqs[index].boss" @change="changeEqBoss(event.target.value, index)">
+                            <option value="" disabled selected>보스 선택</option>
+                            <option v-for="i in bossList" :value="i">
+                                {{i}}
+                            </option>
+                        </select>
+                        <select class="form-select eq-fee" v-model="eqs[index].fee">
+                            <option value="5">5%</option>
+                            <option value="3">3%</option>
+                        </select>
+                        <input type="number" class="form-control eq-num" placeholder="인원"
+                            v-model="eqs[index].num" />
+                    </div>
+                    <input type="number" class="form-control eq-price mb-2" placeholder="가격"
+                            v-model="eqs[index].price" />
+                    <div class="unit" v-if="eqs[index].price && eqs[index].price.length > 0">
+                        {{getUnit(eqs[index].price)}}
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary form-control" @click="addeq">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="underline" v-if="me"></div>
+        <h5 class="mb-3" v-if="me">
+            분배
+        </h5>
+        <div v-if="me">
+            <div class="total-box">
+                <div class="text-center">챤</div>
+                <div>{{getTotal(['하드 루시드'])}}</div>
+            </div>
+            <div class="total-box">
+                <div class="text-center">문겐</div>
+                <div>{{getTotal(['카오스 더스크', "카오스 가디언 엔젤 슬라임"])}}</div>
+            </div>
+            <div class="total-box">
+                <div class="text-center">숍님</div>
+                <div>{{getTotal(['하드 스우','하드 데미안', '노멀 듄켈','카오스 더스크', "카오스 가디언 엔젤 슬라임"])}}</div>
+            </div>
+            <div class="total-box">
+                <div class="text-center">앙크</div>
+                <div>{{getTotal(['하드 루시드', '하드 윌', '카오스 더스크', "카오스 가디언 엔젤 슬라임"])}}</div>
+            </div>
+            <div class="total-box">
+                <div class="text-center">나머지</div>
+                <div>
+                    {{getTotal(['하드 루시드', '하드 윌', '하드 스우','하드 데미안', '노멀 듄켈', '카오스 더스크', "카오스 가디언 엔젤 슬라임"])}}
+                </div>
+            </div>
+        </div>
+            <div v-if="Object.keys(totalEach).length > 0">
+                <div class="underline"></div>
+                <h5 class="tag mb-3">
+                    <div class="tag-left">
+                        <div>
+                            분배금
+                        </div>
+                        <div class="d-flex align-items-center mt-3 section_small">
+                            <label class="radio-label">
+                                장비 포함
+                                <input type="radio" name="eq-include" value="Y" v-model="eqIncludes" @change="changeEqIncludes"/>
+                            </label>
+                            <label class="radio-label">
+                                장비 따로
+                                <input type="radio" name="eq-include" value="N" v-model="eqIncludes" @change="changeEqIncludes"/>
+                            </label>
+                        </div>
+                    </div>
+                    <span>
+                        <div class="select-label">반올림</div>
+                        <select class="form-select mb-3" v-model="round">
+                            <option v-for="i in 8">{{10**(i-1)}}</option>
+                        </select>
+                    </span>
+                </h5>
+                <div>
+                    <div :class="'total-box '+(selected.includes(key)?'exist':'')" v-for="(value, key) in totalEach"
+                        @click="toggle(key)">
+                        <div class="text-center">
+                            {{value.name}} 
+                            <br/><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
+                        </div>
+                        <div>{{getFormat(value.total)}}</div>
+                    </div>
+                    <div class="total-box real-total">
+                        <div class="text-center">총합</div>
+                        <div>{{getFormat(realTotal)}}</div>
+                    </div>
+                </div>
+            </div>
     </div>
 </body>
 <script src="./main.js"></script>
