@@ -25,7 +25,7 @@ var dist = new Vue({
             "pos",
             "scroll",
             "pscroll",
-            "ess",
+            "ess"
         ],
         boss: [
         ],
@@ -53,7 +53,8 @@ var dist = new Vue({
             "카오스 칼로스",
             "검은 마법사"
         ],
-        eqIncludes: 'Y'
+        eqIncludes: 'Y',
+        rates:{}
     },
     computed: {
         me() {
@@ -83,7 +84,7 @@ var dist = new Vue({
                                 ? this.price[j]
                                 : 0);
                     }
-                    bunbae *= this.getDiv(this.people[i]);
+                    bunbae *= this.getDiv(this.people[i].num);
                     for (let j of this.eqs) {
                         if (
                             j.boss === i &&
@@ -112,29 +113,35 @@ var dist = new Vue({
                                     ? this.price[j]
                                     : 0);
                         }
-                        bunbae *= this.getDiv(this.people[i]);
+                        var sum = bunbae * ((100 - this.fee)/100)
+                        bunbae *= this.getDiv(this.people[i].num);
                         tot[i] = {
                             name: i,
                             total: bunbae,
+                            sum: sum
                         };
                     }
                 }
                 for (let i of this.eqs) {
                     var bunbae = 0;
+                    var sum = 0
                     if (i.price && i.num && i.price != "" && i.num != "") {
+                        sum += i.price * ((100 - i.fee)/100)
                         bunbae += i.price * this.getDiv(i.num, i.fee);
                     }
                     if(i.boss && i.price && i.num && i.boss != "" && i.price != "" && i.num != ""){
                         if(this.eqIncludes === 'Y'){
                             tot[i.boss] = {
                                 name: i.boss,
-                                total: bunbae + (tot[i.boss]?tot[i.boss].total:0)
+                                total: bunbae + (tot[i.boss]?tot[i.boss].total:0),
+                                sum: sum + (tot[i.boss]?tot[i.boss].sum:0)
                             };
                         } else{
                             tot['eq' + i.index] = {
                                 name: i.tag,
                                 total: bunbae,
-                                boss: i.boss
+                                boss: i.boss,
+                                sum: sum
                             };
                         }
                     }
@@ -162,7 +169,11 @@ var dist = new Vue({
                 if (add.length > 0) {
                     this.people = {
                         ...this.people,
-                        [add[0]]: 6
+                        [add[0]]: {
+                            num: 6,
+                            rate: ["","","","","",""],
+                            rateYn: 'N'
+                        }
                     }
                 }
                 localStorage["boss"] = JSON.stringify(val);
@@ -196,6 +207,36 @@ var dist = new Vue({
             },
             deep: true,
         },
+        rates: {
+            handler(val, oldVal) {
+                for(let i in val){
+                    if(val[i].useYn){
+                        var sum = 0;
+                        if(this.totalEach[i]){
+                            sum = this.totalEach[i].sum
+                            var total = []
+                            total[0] = val[i].rate[0] != ""?1:0
+                            if(val[i].rate[0] == "" && val[i].rate[1] != ""){
+                                alert("파티장의 비율을 먼저 입력해야 합니다.")
+                                this.rates[i].rate[1] = ""
+                                total[1] = 0
+                            } else{
+                                total[1] = val[i].rate[1] != ""?1:0
+                            }
+                            this.rates = {
+                                ...val,
+                                [i]: {
+                                    ...val[i],
+                                    total: total
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            },
+            deep: true,
+        },
     },
     methods: {
         addboss(val) {
@@ -219,14 +260,6 @@ var dist = new Vue({
                     ...this.count,
                     [boss]: this.resetCount(boss)
                 }
-/*             } else if(){
-
-            } else if(){
-
-            } else if(){
- */
-            } else{
-                
             }
         },
         resetCount(boss){
@@ -309,20 +342,28 @@ var dist = new Vue({
         },
         peopleChange(type, i) {
             if (this.people) {
+                let newArr = [...this.people[i].rate]
+                if(type == 1) newArr.push("")
+                else if(type == -1 && newArr.length > 1) newArr.pop()
+
                 this.people = {
                     ...this.people,
-                    [i]:
-                        this.people[i] + type >= 0
-                            ? this.people[i] + type
-                            : 0,
+                    [i]: {
+                        ...this.people[i],
+                        num: this.people[i].num + type >= 1
+                            ? this.people[i].num + type
+                            : 1,
+                        rate: newArr
+                    }
+                        
                 };
             }
         },
         addeq() {
             this.eqs.push({
-                boss: this.boss[0]?this.boss[0]:"",
+                boss: "",
                 price: "",
-                num: this.people[this.boss[0]],
+                num: "",
                 tag:
                     "장비" +
                     (this.eqs.reduce(
@@ -341,7 +382,7 @@ var dist = new Vue({
             });
         },
         changeEqBoss(val, i){
-            this.eqs[i].num = this.people[val]?this.people[val]:this.eqs[i].num
+            this.eqs[i].num = this.people[val]?this.people[val].num:this.eqs[i].num
         },
         deleq(i) {
             this.eqs.splice(i, 1);
@@ -353,6 +394,36 @@ var dist = new Vue({
             if (this.selected.includes(k)) {
                 this.selected = this.selected.filter((a) => a != k);
             } else this.selected.push(k);
+        },
+        changeRateYn(key, type) {
+            if (type) {
+                if(this.rates[key]){
+                    this.rates = {
+                        ...this.rates,
+                        [key]: {
+                            ...this.rates[key],
+                            useYn: true
+                        }
+                    }
+                } else{
+                    this.rates = {
+                        ...this.rates,
+                        [key]: {
+                            useYn: true,
+                            rate: ["", ""],
+                            total: ""
+                        }
+                    }
+                }
+            } else {
+                this.rates = {
+                    ...this.rates,
+                    [key]: {
+                        ...this.rates[key],
+                        useYn: false
+                    }
+                }
+            }
         },
     },
     created() {

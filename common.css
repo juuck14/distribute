@@ -8,6 +8,8 @@ body{
     font-family: 'maplestory';
     max-width: 768px;
     margin: auto;
+    background-color: #e7e7e7;
+    padding: 10px;
 }
 select option[value=""][disabled] {
 	display: none;
@@ -45,7 +47,9 @@ select option[value=""][disabled] {
     width:100%;
     display: flex;
     flex-direction: column;
-    padding:25px
+    padding:25px;
+    background: #fcfcfc;
+    border-radius: 10px;
 }
 .float-left{
     float:left;
@@ -96,7 +100,10 @@ select option[value=""][disabled] {
     width: 23px;
     text-align: center;
 }
-
+ .rate-tag{
+    width: 40%;
+    justify-content: center;
+ }
 .bossItem{
     width: 100%;
     background: #f1f1f1;
@@ -218,24 +225,61 @@ select option[value=""][disabled] {
     display: flex;
     font-size: 0.875rem;
 }
-.total-box div:nth-child(1){
+.total-box > div:nth-child(1){
     width: 35%;
     background: #e9ecef;
     border: 1px solid #ced4da;
     padding: 5px;
 }
-.total-box.exist div:nth-child(1) {
+.total-box.exist > div:nth-child(1) {
     background: #2a955a;
     color: white;
     border: 1px solid black;
     font-weight: 600;
 }
-.total-box div:nth-child(2){
+.total-box > div:nth-child(2){
     display: flex;
     align-items: center;
     padding: 0 15px;
     width: 65%;
     border: 1px solid #ced4da;
+    justify-content: space-between;
+}
+.rate-box > label{
+    padding: 5px;
+    width: 20%;
+    border: 1px solid #ced4da;
+}
+.rate-box > div:nth-child(1){
+    background-color: #ced4da;
+    border: 1px solid #b6bcc1;
+}
+.rate-box > label > div{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+.rate-box > label input{
+    outline: none;
+    border: none;
+    width: 70%;
+    text-align: center;
+}
+.rate-box.exist > label input{
+    background: #cafaca;
+}
+.rate-box > label > div > div:nth-child(2){
+    width: 30%;
+    text-align: right;
+}
+.rate-box > div:nth-child(3){
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    width: 45%;
+    border: 1px solid #ced4da;
+    justify-content: space-between;
 }
 .total-box.real-total{
     border: 3px solid;
