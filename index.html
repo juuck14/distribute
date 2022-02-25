@@ -55,7 +55,7 @@
                                 인원수
                                 <div class="people">
                                     <div @click="peopleChange(-1, i)"><i class="fa-solid fa-minus"></i></div>
-                                    <div>{{people[i].num}}</div>
+                                    <div>{{people[i]}}</div>
                                     <div @click="peopleChange(1, i)"><i class="fa-solid fa-plus"></i></div>
                                 </div>
                             </div>
@@ -69,32 +69,19 @@
                             </button>
                         </div>
                     </div>
-                    <div class="section_2line mb-3" v-if="people[i].rateYn === 'Y'">
-                        <div class="price-input" v-for="(j, index) in people[i].rate">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text rate-tag">
-                                    {{'파티원' + (index + 1)}}
-                                </span>
-                                <input type="number" class="form-control" v-model="people[i].rate[index]"/>
-                                <span class="input-group-text">
-                                    %
-                                </span>
-                            </div>
-                        </div>
-                    </div>
                     <div class="bossItem text-center mb-5">
-                        <div v-for="j in 4">
+                        <div v-for="j in Math.ceil(filterItems(items, i).length/4)">
                             <div class="row">
-                                <div class="col icon icon_1" v-for="k in 4"
-                                    :style="'background: url(./images/'+items[(j*4)+k-5]+'.png) no-repeat center'">
+                                <div class="col col-3 icon icon_1" v-for="k in 4" v-if="filterItems(items, i)[(j*4)+k-5]"
+                                    :style="'background: url(./images/'+filterItems(items, i)[(j*4)+k-5]+'.png) no-repeat center'">
                                 </div>
                             </div>
                             <div class="row last">
-                                <div class="num col" v-for="k in 4">
+                                <div class="num col col-3" v-for="k in 4" v-if="filterItems(items, i)[(j*4)+k-5]">
                                     <div @click="numChange(-1, i, j, k)">
                                         <i class="fa-solid fa-minus"></i>
                                     </div>
-                                    <div>{{count[i][items[(j*4)+k-5]]}}</div>
+                                    <div>{{count[i][filterItems(items, i)[(j*4)+k-5]]}}</div>
                                     <div @click="numChange(1, i, j, k)"><i class="fa-solid fa-plus"></i></div>
                                 </div>
                             </div>
@@ -141,7 +128,7 @@
                     <div class="input-group">
                         <select class="form-select" v-model="eqs[index].boss" @change="changeEqBoss(event.target.value, index)">
                             <option value="" disabled selected>보스 선택</option>
-                            <option v-for="i in bossList" :value="i">
+                            <option v-for="i in bossList.slice(2)" :value="i">
                                 {{i}}
                             </option>
                         </select>

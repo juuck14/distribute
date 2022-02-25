@@ -16,15 +16,17 @@ var dist = new Vue({
             "blue",
             "addcube",
             "honor",
-            "flame",
-            "forflame",
-            "darkflame",
             "rein",
             "forrein",
             "darkrein",
+            "flame",
+            "forflame",
+            "darkflame",
             "pos",
             "scroll",
             "pscroll",
+            "ppet",
+            "magic",
             "ess"
         ],
         boss: [
@@ -43,14 +45,14 @@ var dist = new Vue({
             "하드 스우",
             "하드 루시드",
             "하드 윌",
-            "카오스 가디언 엔젤 슬라임",
             "노멀 진 힐라",
+            "카오스 가디언 엔젤 슬라임",
             "카오스 더스크",
             "하드 듄켈",
             "하드 진 힐라",
             "노멀 세렌",
             "하드 세렌",
-            "카오스 칼로스",
+            // "카오스 칼로스",
             "검은 마법사"
         ],
         eqIncludes: 'Y',
@@ -84,7 +86,7 @@ var dist = new Vue({
                                 ? this.price[j]
                                 : 0);
                     }
-                    bunbae *= this.getDiv(this.people[i].num);
+                    bunbae *= this.getDiv(this.people[i]);
                     for (let j of this.eqs) {
                         if (
                             j.boss === i &&
@@ -114,7 +116,7 @@ var dist = new Vue({
                                     : 0);
                         }
                         var sum = bunbae * ((100 - this.fee)/100)
-                        bunbae *= this.getDiv(this.people[i].num);
+                        bunbae *= this.getDiv(this.people[i]);
                         tot[i] = {
                             name: i,
                             total: bunbae,
@@ -194,11 +196,7 @@ var dist = new Vue({
                 if (add.length > 0) {
                     this.people = {
                         ...this.people,
-                        [add[0]]: {
-                            num: 6,
-                            rate: ["","","","","",""],
-                            rateYn: 'N'
-                        }
+                        [add[0]]: 6
                     }
                 }
                 for(let i in this.rates){
@@ -296,7 +294,7 @@ var dist = new Vue({
                     else if (["노멀 더스크","노멀 듄켈"].includes(boss)) cnt[i] = 6;
                     else if (["하드 데미안"].includes(boss)) cnt[i] = 7;
                     else if (["하드 스우"].includes(boss)) cnt[i] = 8;
-                    else if (["하드 스우","하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) cnt[i] = 9;
+                    else if (["하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) cnt[i] = 9;
                     else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) cnt[i] = 10;
                     else if (["하드 세렌"].includes(boss)) cnt[i] = 11;
                     else if (["검은 마법사"].includes(boss)) cnt[i] = 30;
@@ -308,6 +306,21 @@ var dist = new Vue({
         deleteBoss(boss){
             this.boss = this.boss.filter(a=>a!=boss)
             delete this.count[boss]
+        },
+        filterItems(arr, boss){
+            var last = 0
+            var remove = 0
+            if (["노멀 스우","노멀 데미안"].includes(boss)) last = 7;
+            else if (["노멀 가디언 엔젤 슬라임","이지 루시드", "이지 윌","노멀 루시드","노멀 윌"].includes(boss)) last = 8;
+            else if (["노멀 더스크","노멀 듄켈"].includes(boss)) last = 9;
+            else if (["하드 스우","하드 데미안","하드 루시드","하드 윌","노멀 진 힐라"].includes(boss)) last = 14;
+            else if (["카오스 가디언 엔젤 슬라임","카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌","하드 세렌","검은 마법사"].includes(boss)) {
+                last = 18;
+                remove = 13;
+            }
+            var newArr = arr.slice(0, last)
+            newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
+            return newArr
         },
         numChange(type, i, j, k) {
             if (this.count) {
@@ -366,20 +379,11 @@ var dist = new Vue({
         },
         peopleChange(type, i) {
             if (this.people) {
-                let newArr = [...this.people[i].rate]
-                if(type == 1) newArr.push("")
-                else if(type == -1 && newArr.length > 1) newArr.pop()
-
                 this.people = {
                     ...this.people,
-                    [i]: {
-                        ...this.people[i],
-                        num: this.people[i].num + type >= 1
-                            ? this.people[i].num + type
-                            : 1,
-                        rate: newArr
-                    }
-                        
+                    [i]: this.people[i] + type >= 1
+                            ? this.people[i] + type
+                            : 1
                 };
             }
         },
@@ -406,7 +410,7 @@ var dist = new Vue({
             });
         },
         changeEqBoss(val, i){
-            this.eqs[i].num = this.people[val]?this.people[val].num:this.eqs[i].num
+            this.eqs[i].num = this.people[val]?this.people[val]:this.eqs[i].num
         },
         deleq(i) {
             this.eqs.splice(i, 1);
