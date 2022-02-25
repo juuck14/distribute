@@ -24,6 +24,19 @@ select option[value=""][disabled] {
     font-size: 0.9rem;
     margin-bottom: 70px;
 }
+.modal-body{
+    display: flex;
+    
+    align-items: center;
+    flex-direction: column;
+}
+.desc{
+    border: none !important;
+    outline: none !important;
+    width: 90%;
+    height: 80vh;
+    resize: none;
+}
 .btn-info{
     color: white !important;
 }

@@ -322,7 +322,8 @@ var dist = new Vue({
                 remove = 13;
             }
             var newArr = arr.slice(0, last)
-            newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
+            
+            newArr[remove] = remove > 0?newArr.filter(a => a != 'scroll'):newArr
             return newArr
         },
         numChange(type, i, j, k) {
