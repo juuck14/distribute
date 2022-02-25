@@ -220,19 +220,25 @@ select option[value=""][disabled] {
     text-align: right;
     margin-bottom: 0.5rem;
 }
+.total-unit.rate{
+    border: 2px solid #171741;
+    border-radius: 2px;
+}
 .total-box{
     width:100%;
     display: flex;
     font-size: 0.875rem;
 }
+
 .total-box > div:nth-child(1){
     width: 35%;
     background: #e9ecef;
     border: 1px solid #ced4da;
     padding: 5px;
+    font-size: 1rem;
 }
 .total-box.exist > div:nth-child(1) {
-    background: #2a955a;
+    background: #51c686;
     color: white;
     border: 1px solid black;
     font-weight: 600;
@@ -245,10 +251,19 @@ select option[value=""][disabled] {
     border: 1px solid #ced4da;
     justify-content: space-between;
 }
+.rate-box{
+    font-size: 0.75rem !important;
+}
+.total-box.rate-box > div:nth-child(1){
+    font-size: 0.75rem;
+}
 .rate-box > label{
     padding: 5px;
     width: 20%;
     border: 1px solid #ced4da;
+}
+.rate-box.danger > label{
+    background-color: antiquewhite !important;
 }
 .rate-box > div:nth-child(1){
     background-color: #ced4da;
@@ -265,6 +280,9 @@ select option[value=""][disabled] {
     border: none;
     width: 70%;
     text-align: center;
+}
+.rate-box.danger > label input{
+    background-color: antiquewhite !important;
 }
 .rate-box.exist > label input{
     background: #cafaca;
@@ -283,5 +301,20 @@ select option[value=""][disabled] {
 }
 .total-box.real-total{
     border: 3px solid;
+    border-radius: 0 0 3px 3px;
     font-weight: 600;
+}
+.footer{
+    margin-top: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.bar{
+    border: 2px solid;
+    width: 2rem;
+    border-radius: 2px;
+}
+.footer span{
+    font-size: 2rem;
 }

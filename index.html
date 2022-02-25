@@ -193,75 +193,79 @@
                 </div>
             </div>
         </div>
-            <div v-if="Object.keys(totalEach).length > 0">
-                <div class="underline"></div>
-                <h5 class="tag mb-3">
-                    <div class="tag-left">
-                        <div>
-                            분배금
-                        </div>
-                        <div class="d-flex align-items-center mt-3 section_small">
-                            <label class="radio-label">
-                                장비 포함
-                                <input type="radio" name="eq-include" value="Y" v-model="eqIncludes" @change="changeEqIncludes"/>
-                            </label>
-                            <label class="radio-label">
-                                장비 따로
-                                <input type="radio" name="eq-include" value="N" v-model="eqIncludes" @change="changeEqIncludes"/>
-                            </label>
-                        </div>
+        <div v-if="Object.keys(totalEach).length > 0">
+            <div class="underline"></div>
+            <h5 class="tag mb-3">
+                <div class="tag-left">
+                    <div>
+                        분배금
                     </div>
-                    <span>
-                        <div class="select-label">반올림</div>
-                        <select class="form-select mb-3" v-model="round">
-                            <option v-for="i in 8">{{10**(i-1)}}</option>
-                        </select>
-                    </span>
-                </h5>
-                <div>
-                    <div v-for="(value, key) in totalEach">
-                        <div :class="'total-box '+(selected.includes(key)?'exist':'')" @click="toggle(key)">
-                            <div class="text-center">
-                                {{value.name}} 
-                                <br/><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
-                            </div>
-                            <div>
-                                {{getFormat(value.total)}}
-                                <div class="d-flex align-items-center section_small" onclick="event.stopPropagation()">
-                                    <label class="radio-label me-0">
-                                        <input type="checkbox" name="rate-Yn" @change="changeRateYn(key, event.target.checked)"/>
-                                        비율
-                                    </label>
-                                </div>
-                            </div>
+                    <div class="d-flex align-items-center mt-3 section_small">
+                        <label class="radio-label">
+                            장비 포함
+                            <input type="radio" name="eq-include" value="Y" v-model="eqIncludes" @change="changeEqIncludes"/>
+                        </label>
+                        <label class="radio-label">
+                            장비 따로
+                            <input type="radio" name="eq-include" value="N" v-model="eqIncludes" @change="changeEqIncludes"/>
+                        </label>
+                    </div>
+                </div>
+                <span>
+                    <div class="select-label">반올림</div>
+                    <select class="form-select mb-3" v-model="round">
+                        <option v-for="i in 8">{{10**(i-1)}}</option>
+                    </select>
+                </span>
+            </h5>
+            <div>
+                <div v-for="(value, key) in totalEach" :class="'total-unit ' + (rates[key] && rates[key].useYn? 'rate':'')">
+                    <div :class="'total-box '+(selected.includes(key)?'exist':'')" @click="toggle(key)">
+                        <div class="text-center">
+                            {{value.name}} 
+                            <br/><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
                         </div>
-                        <div v-if="rates[key] && rates[key].useYn">
-                            <div :class="'total-box rate-box '+(selected.includes(key)?'exist':'')" @click="toggle(key)" 
-                             v-for="(i, index) in rates[key].rate">
-                                <div class="text-center">
-                                    {{index == 0?'파티장':'파티원' + index}}
-                                    <br/><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
-                                </div>
-                                <label onclick="event.stopPropagation()">
-                                    <div>
-                                        <input type="text" v-model="rates[key].rate[index]">
-                                        <div>%</div>
-                                    </div>
+                        <div>
+                            {{getFormat(value.total)}}
+                            <div class="d-flex align-items-center section_small" onclick="event.stopPropagation()">
+                                <label class="radio-label me-0">
+                                    <input type="checkbox" name="rate-Yn" :checked="rates[key] && rates[key].useYn" @change="changeRateYn(key, event.target.checked)"/>
+                                    비율
                                 </label>
-                                <div>
-                                    {{getFormat(value.total)}}
-                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="total-box real-total">
-                        <div class="text-center">총합</div>
-                        <div>
-                            {{getFormat(realTotal)}}
+                    <div v-if="rates[key] && rates[key].useYn">
+                        <div :class="'total-box rate-box ' + (selected.includes(key + '_' + index)?'exist ':'') + (index == 0 && (i === '' || i == 100)?'danger':'')" @click="toggle(key, '_' + index)" 
+                            v-for="(i, index) in rates[key].rate">
+                            <div class="text-center">
+                                {{index == 0?'\'파티장\'의 비율':'다른 파티원'}}
+                                <span v-if="index == 0" class="text-danger">*</span>
+                            </div>
+                            <label onclick="event.stopPropagation()">
+                                <div>
+                                    <input type="text" v-model="rates[key].rate[index]">
+                                    <div>%</div>
+                                </div>
+                            </label>
+                            <div>
+                                {{getFormat(ratedTotal[key][index])}}
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="total-box real-total">
+                    <div class="text-center">총합</div>
+                    <div>
+                        {{getFormat(realTotal)}}
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="footer">
+            <div class="bar" onclick="window.scrollTo(0,0)"></div>
+            <span><i class="fa-solid fa-arrow-up" onclick="window.scrollTo(0,0)"></i></span>
+        </div>
     </div>
 </body>
 <script src="./main.js"></script>

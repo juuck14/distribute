@@ -149,11 +149,36 @@ var dist = new Vue({
                 return tot;
             }
         },
+        ratedTotal() {
+            var tot = {}
+            for(let i in this.rates){
+                if(this.rates[i].useYn){
+                    var sum = 0;
+                    if(this.totalEach[i]){
+                        sum = this.totalEach[i].sum
+                        var total = []
+                        total[0] = this.rates[i].rate[0] != ""?this.getRatedTotal(sum, this.rates[i].rate[0]):0
+                        if(this.rates[i].rate[0] == "" && this.rates[i].rate[1] != ""){
+                            total[1] = 0
+                        } else{
+                            total[1] = this.rates[i].rate[1] != ""?this.getRatedTotal(sum, this.rates[i].rate[0], this.rates[i].rate[1]):0
+                        }
+                        tot[i] = total
+                    }
+                }
+            }
+            return tot
+        },
         realTotal() {
             var sum = 0;
             var that = this;
             this.selected.forEach((a) => {
-                sum += that.totalEach[a].total;
+                if(a.split('_')[1]){
+                    if(that.ratedTotal[a.split('_')[0]]){
+                        sum += that.ratedTotal[a.split('_')[0]][a.split('_')[1]];
+                    }
+                } else sum += that.totalEach[a].total;
+                
             });
             return sum;
         },
@@ -174,6 +199,11 @@ var dist = new Vue({
                             rate: ["","","","","",""],
                             rateYn: 'N'
                         }
+                    }
+                }
+                for(let i in this.rates){
+                    if(!Object.keys(this.totalEach).includes(i)){
+                        delete this.rates[i]
                     }
                 }
                 localStorage["boss"] = JSON.stringify(val);
@@ -198,6 +228,11 @@ var dist = new Vue({
         eqs: {
             handler(val, oldVal) {
                 localStorage["eqs"] = JSON.stringify(val);
+                for(let i in this.rates){
+                    if(!Object.keys(this.totalEach).includes(i)){
+                        delete this.rates[i]
+                    }
+                }
             },
             deep: true,
         },
@@ -210,33 +245,22 @@ var dist = new Vue({
         rates: {
             handler(val, oldVal) {
                 for(let i in val){
-                    if(val[i].useYn){
-                        var sum = 0;
-                        if(this.totalEach[i]){
-                            sum = this.totalEach[i].sum
-                            var total = []
-                            total[0] = val[i].rate[0] != ""?1:0
-                            if(val[i].rate[0] == "" && val[i].rate[1] != ""){
-                                alert("파티장의 비율을 먼저 입력해야 합니다.")
-                                this.rates[i].rate[1] = ""
-                                total[1] = 0
-                            } else{
-                                total[1] = val[i].rate[1] != ""?1:0
-                            }
-                            this.rates = {
-                                ...val,
-                                [i]: {
-                                    ...val[i],
-                                    total: total
-                                }
-                            }
-                            
-                        }
-                    }
+                    val[i].rate[0] = val[i].rate[0] > 100? 100:val[i].rate[0]
+                    val[i].rate[1] = val[i].rate[1] > 100? 100:val[i].rate[1]
                 }
             },
             deep: true,
         },
+        totalEach: {
+            handler(val, oldVal) {
+                for(let i of this.selected){
+                    if(!Object.keys(val).includes(i)){
+                        this.selected = this.selected.filter(a => a != i);
+                    }
+                }
+            },
+            deep: true,
+        }
     },
     methods: {
         addboss(val) {
@@ -307,7 +331,7 @@ var dist = new Vue({
             n = n.toString();
             var r = this.getReverse(n);
             var part = [];
-            var units = ["만", "억", "조"];
+            var units = [" 만", " 억", " 조"];
             for (let i = 0; i < r.length / 4; i++) {
                 part.push(r.substr(i * 4, 4));
             }
@@ -315,7 +339,7 @@ var dist = new Vue({
             for (let i = 0; i < part.length; i++) {
                 u += part[i] + (i != part.length - 1 ? units[i] : "");
             }
-            return this.getReverse(u);
+            return this.getReverse(u) + '메소';
         },
         getReverse(n) {
             var r = "";
@@ -389,11 +413,15 @@ var dist = new Vue({
         },
         changeEqIncludes() {
             this.selected = []
+            this.rates = {}
         },
-        toggle(k) {
-            if (this.selected.includes(k)) {
-                this.selected = this.selected.filter((a) => a != k);
-            } else this.selected.push(k);
+        toggle(k, i = "") {
+            if (this.selected.includes(k + i)) {
+                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
+            } else {
+                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
+                this.selected.push(k + i);
+            }
         },
         changeRateYn(key, type) {
             if (type) {
@@ -425,6 +453,12 @@ var dist = new Vue({
                 }
             }
         },
+        getRatedTotal(sum, head, target = head) {
+            var memR = (100 - head)/(100 - (0.05 * head));
+            var targetR = target / (100 - head);
+            console.log(sum, head, target, memR, targetR)
+            return sum * memR * targetR;
+        }
     },
     created() {
         if (localStorage.getItem("boss")) {
