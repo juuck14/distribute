@@ -211,6 +211,9 @@ var dist = new Vue({
         fee(val, oldVal) {
             localStorage["fee"] = val;
         }, 
+        round(val, oldVal) {
+            localStorage["round"] = val;
+        }, 
         price: {
             handler(val, oldVal) {
                 localStorage["price"] = JSON.stringify(val);
@@ -479,6 +482,9 @@ var dist = new Vue({
         }
         if (localStorage.getItem("eqs")) {
             this.eqs = JSON.parse(localStorage.getItem("eqs"));
+        }
+        if (localStorage.getItem("round")) {
+            this.round = JSON.parse(localStorage.getItem("round"));
         }
         if (localStorage.getItem("count")) {
             this.count = JSON.parse(localStorage.getItem("count"));
