@@ -91,7 +91,7 @@ select option[value=""][disabled] {
     display: flex;
     border: 1px solid #ced4da;
     margin-left: 10px;
-    border-radius: 11px;
+    border-radius: 13px;
 }
 .people div{
     padding: 2px 7px
