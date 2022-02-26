@@ -98,22 +98,19 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                             </button>
                         </div>
                     </div>
-                    <div class="bossItem text-center mb-5">
-                        <div v-for="j in Math.ceil(filterItems(items, i).length/4)">
-                            <div class="row">
-                                <div :class="col col-3 icon icon_1" v-for="k in 4" v-if="filterItems(items, i)[(j*4)+k-5]"
-                                    :style="'background: url(./images/'+filterItems(items, i)[(j*4)+k-5]+'.png) no-repeat center'">
+                    <div class="bossItem mb-5">
+                        <div v-for="(val, j) in filterItems(items, i)" class="item">
+                                <div class="icon icon_1"
+                                    :style="'background: url(./images/'+ val +'.png) no-repeat center'">
                                 </div>
-                            </div>
-                            <div class="row last">
-                                <div class="num col col-3" v-for="k in 4" v-if="filterItems(items, i)[(j*4)+k-5]">
-                                    <div @click="numChange(-1, i, j, k)">
+
+                                <div class="num icon text-center">
+                                    <div @click="numChange(-1, i, val)">
                                         <i class="fa-solid fa-minus"></i>
                                     </div>
-                                    <div>{{count[i][filterItems(items, i)[(j*4)+k-5]]}}</div>
-                                    <div @click="numChange(1, i, j, k)"><i class="fa-solid fa-plus"></i></div>
+                                    <div>{{count[i][val]}}</div>
+                                    <div @click="numChange(1, i, val)"><i class="fa-solid fa-plus"></i></div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>

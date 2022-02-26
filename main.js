@@ -323,21 +323,21 @@ var dist = new Vue({
             }
             var newArr = arr.slice(0, last)
             
-            newArr[remove] = remove > 0?newArr.filter(a => a != 'scroll'):newArr
+            newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
             return newArr
         },
-        numChange(type, i, j, k) {
+        numChange(type, boss, item) {
             if (this.count) {
                 this.count = {
                     ...this.count,
-                    [i]: {
-                        ...this.count[i],
-                        [this.items[j * 4 + k - 5]]:
-                            this.count[i][this.items[j * 4 + k - 5]] +
+                    [boss]: {
+                        ...this.count[boss],
+                        [item]:
+                            this.count[boss][item] +
                                 type >=
                                 0
-                                ? this.count[i][
-                                this.items[j * 4 + k - 5]
+                                ? this.count[boss][
+                                    item
                                 ] + type
                                 : 0,
                     },

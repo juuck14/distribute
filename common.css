@@ -119,6 +119,10 @@ select option[value=""][disabled] {
  }
 .bossItem{
     width: 100%;
+}
+.item{
+    width:25%;
+    display: inline-block;
     background: #f1f1f1;
 }
 .icon{
@@ -127,6 +131,7 @@ select option[value=""][disabled] {
 .icon.icon_1{
     background-size: auto 28px !important;
     height:32px;
+    border: 1px solid gray;
 }
 .icon_2{
     width: 28px;
@@ -135,9 +140,7 @@ select option[value=""][disabled] {
 .row{
     --bs-gutter-x: 0;
 }
-.col{
-    border: 1px solid gray;
-}
+
 .last{
     border-bottom: 2px solid black;
 }
@@ -150,6 +153,7 @@ select option[value=""][disabled] {
 .num{
     display: flex;
     justify-content: center;
+    border: 1px solid gray;
 }
 
 .num div{
