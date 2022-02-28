@@ -85,8 +85,14 @@ select option[value=""][disabled] {
 .section_xs{
     font-size: 0.5rem;
 }
+.section_xxs{
+    font-size: 0.4rem;
+}
 .section_small{
     font-size: 0.875rem;
+}
+.section_small.section_small_important{
+    font-size: 0.875rem !important;
 }
 .section_normal{
     font-size: 1rem;
@@ -175,26 +181,48 @@ select option[value=""][disabled] {
     width:100%;
     margin: 15px 0 15px 0;
 }
-.eq-name{
+.name{
     position:relative;
     width: 50%;
-    float: left;
 }
-.eq-name-input{
+.name.name-sm{
+    width: 20%;
+}
+.name-input{
     border: none;
     font-size: 1rem !important;
     width: 100%;
     border-bottom: 1px solid gray;
-    padding: 0 24px 0px 4px;
+    padding-right: 25px !important; 
+    border-radius: unset;
 }
-.eq-name-input:focus-visible{
+.name-input:focus{
+    box-shadow: none;
+}
+.name-input:focus-visible{
     outline: none;
 }
-.eq-edit{
+.name-edit{
     position: absolute;
     height: 27px;
     right: 5px;
     line-height: 27px;
+}
+.name-edit-lg{
+    position: absolute;
+    bottom: 0.625rem;
+    right: 5px;
+}
+.name-edit-mlg{
+    position: absolute;
+    bottom: 0.375rem;
+    right: 5px;
+}
+.input-lg{
+    padding-top: 1.625rem;
+}
+.input-mlg{
+    padding-top: 0.375rem;
 }
 .remove-circle{
     padding: 0;
@@ -279,7 +307,7 @@ select option[value=""][disabled] {
     width: 20%;
     border: 1px solid #ced4da;
 }
-.rate-box.danger > label{
+.danger > label{
     background-color: antiquewhite !important;
 }
 .rate-box > div:nth-child(1){
@@ -298,7 +326,7 @@ select option[value=""][disabled] {
     width: 70%;
     text-align: center;
 }
-.rate-box.danger > label input{
+.danger > label input{
     background-color: antiquewhite !important;
 }
 .rate-box.exist > label input{
@@ -335,3 +363,20 @@ select option[value=""][disabled] {
 .footer span{
     font-size: 2rem;
 }
+.toastify {
+    padding: 12px 20px;
+    color: #ffffff;
+    display: inline-block;
+    box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.12), 0 10px 36px -4px rgba(77, 96, 232, 0.3);
+    background: -webkit-linear-gradient(315deg, #73a5ff, #5477f5);
+    background: linear-gradient(135deg, #73a5ff, #5477f5);
+    position: fixed;
+    top: -150px;
+    right: 15px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    border-radius: 2px;
+    cursor: pointer;
+    z-index: 9999;
+  }
+  .toastify.on { opacity: 1; }
