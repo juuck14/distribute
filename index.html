@@ -12,6 +12,7 @@
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/4b54ff36e2.js" crossorigin="anonymous"></script>
+    <script src="./resources/toastify-js-master/src/toastify.js"></script>
     <link rel="shortcut icon" href="favicon.ico">
 </head>
 
@@ -23,12 +24,12 @@
         <div class="author mb-2" data-bs-toggle="modal" data-bs-target="#myModal">사용법</div>
         <div class="author">제작자: 캬쿠켜쿄큐</div>
         <div class="modal" id="myModal">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <h5 class="mb-3">⭐사용법⭐</h5>
-                  <textarea class="desc" readonly>1. 보스를 추가하거나 장비를 추가하고 경매장 수수료를 선택한다.
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <h5 class="mb-3">⭐사용법⭐</h5>
+                        <textarea class="desc" readonly>1. 보스를 추가하거나 장비를 추가하고 경매장 수수료를 선택한다.
                     
 2. 파티 인원, 아이템 개수를 입력한다.
                     
@@ -45,26 +46,147 @@
 6-2. '파티장'의 비율을 입력하면, 해당 비율에 맞는 분배금이 나온다. 또한, 파티장이 받는 비율과 다른 비율로 받는 파티원이 있으면, '다른 파티원' 행에 비율을 입력하면 된다.
                     
 ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받으면, '파티장'의 비율에 18을 입력하고, 다른 파티원에 10을 입력해서 나온 값대로 분배하면 된다.
-                </textarea>
+                        </textarea>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
+        </div>
+        <h5 class="mb-3">파티원 추가</h5>
         <div>
-            <span class="float-left">
+            <div class="d-flex mb-4">
+                <div class="name form-floating">
+                    <span class="name-edit-lg"><label for="nickname"><i class="fa-solid fa-pen"></i></label></span>
+                    <input type="text" class="form-control name-input" id="nickname" placeholder="닉네임"
+                        v-model="nickname" />
+                    <label for="nickname">닉네임</label>
+                </div>
+                <label class="input-lg ms-3">
+                    파티장
+                    <input type="checkbox" class="form-check-input" id="chief">
+                </label>
+            </div>
+            <div class="mb-4">
                 <div class="mb-2">보스 추가</div>
-                <select class="form-select mb-3" @change="addboss(event.target.value)">
+                <select class="form-select w-auto" @change="addBoss(event.target.value)">
                     <option value="" disabled selected>보스 추가하기</option>
                     <option v-for="i in bossList">{{i}}</option>
                 </select>
+            </div>
+            <div v-for="(i, index) in selectedBoss">
+                <button type="button" class="float-end w-auto btn btn-danger remove-circle form-control"
+                    @click="deleteBoss(index)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="mb-4">
+                    <div class="mb-2">{{i.boss}}
+                    </div>
+                    <div class="d-flex align-items-center section_small">
+                        <label class="radio-label">
+                            1/n
+                            <input type="radio" :name="'rate-yn-'+i.boss" v-model="selectedBoss[index].rate"
+                                value="rest" checked />
+                        </label>
+                        <label class="radio-label">
+                            비율 설정
+                            <input type="radio" :name="'rate-yn-'+i.boss" @change="selectedBoss[index].rate = ''"
+                                value="Y" :checked="selectedBoss[index].rate != 'rest'" />
+                        </label>
+                        <div :class="'name name-sm '+(selectedBoss[index].rate >= 100?'danger':'')"
+                            v-if="selectedBoss[index].rate != 'rest'">
+                            <label for="nickname">
+                                <span class="name-edit">%</span>
+                                <input type="number"
+                                    class="text-center form-control section_small section_small_important form-control-sm name-input"
+                                    v-model="selectedBoss[index].rate" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary w-100 mt-3" @click="addPeople">파티원 추가</button>
+        </div>
+        <div class="underline"></div>
+        <h5 class="mb-3">파티원</h5>
+        <div v-for="(person, key) in people">
+            <div class="d-flex mb-4 mt-3">
+                <div class="name" data-bs-toggle="modal" :data-bs-target="'#nameEdit'+key" data-show="true">
+                    <span class="name-edit-mlg"><label :for="'nickname'+key"><i class="fa-solid fa-pen"></i></label></span>
+                    <input type="text" class="form-control name-input" :id="'nickname'+key" placeholder="닉네임"
+                        :value="key" readonly/>
+                </div>
+                <label class="input-mlg ms-3">
+                    파티장
+                    <input type="checkbox" class="form-check-input" :checked="chief == key" @change="changeChief(key)">
+                </label>
+            </div>
+            <div v-for="(i, index) in person" class="ps-3">
+                <button type="button" class="float-end w-auto btn btn-danger remove-circle form-control"
+                    @click="deleteBoss(index, 'people', key)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="mb-4">
+                    <div class="mb-2"><input type="checkbox" class="form-check-input" v-model="person[index].useYn" :disabled="key == chief"/> {{i.boss}}
+                    </div>
+                    <div class="d-flex align-items-center section_small">
+                        <label class="radio-label">
+                            1/n
+                            <input type="radio" :name="'rate-yn-'+i.boss+'-'+key" v-model="person[index].rate"
+                                value="rest" checked />
+                        </label>
+                        <label class="radio-label">
+                            비율 설정
+                            <input type="radio" :name="'rate-yn-'+i.boss+'-'+key" @change="person[index].rate = ''"
+                                value="Y" :checked="person[index].rate != 'rest'" />
+                        </label>
+                        <div :class="'name name-sm '+(person[index].rate >= 100?'danger':'')"
+                            v-if="person[index].rate != 'rest'">
+                            <label for="nickname">
+                                <span class="name-edit">%</span>
+                                <input type="number"
+                                    class="text-center form-control section_small section_small_important form-control-sm name-input"
+                                    v-model="person[index].rate" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" :id="'nameEdit'+key">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <h5 class="mb-5">닉네임 변경</h5>
+                            <div class="name mb-5">
+                                <span class="name-edit-mlg"><label :for="'nicknameEdit'+key"><i class="fa-solid fa-pen"></i></label></span>
+                                <input type="text" class="form-control text-center name-input" :id="'nicknameEdit'+key" placeholder="닉네임"
+                                    :value="key" autofocus />
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-primary" @click="changeNickname(key)" data-bs-dismiss="modal">저장</button>
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">닫기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="underline"></div>
+        <div class="d-flex justify-content-between">
+            <div>
                 <div class="mb-2">경매장 수수료</div>
-                <select class="form-select w-auto" v-model="fee">
+                <select class="form-select w-auto mb-3" v-model="fee">
                     <option value="5">5%</option>
                     <option value="3">3%</option>
                 </select>
-            </span>
-            
-            <span class="float-right">
+                <div class="form-check form-switch">
+                    <label>
+                        <input type="checkbox" class="form-check-input"/>
+                        장비만 계산
+                    </label>
+                </div>
+            </div>
+
+            <span>
                 <button type="button" class="btn btn-info section_small" @click="reset('all')">
                     초기화
                 </button>
@@ -72,33 +194,30 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
         </div>
         <div class="underline"></div>
         <h5 class="mb-4">보스</h5>
-        <div v-if="boss.length > 0">
+        <div v-if="Object.keys(boss).length > 0">
             <div class="section_small">
-                <div class="boss-input" v-for="i in boss">
+                <div class="boss-input" v-for="(bosses, key) in boss">
                     <div class="tag mb-3">
                         <div class="tag-left">
                             <div class="section_normal">
-                                {{i}}
+                                {{key}}인팟
                             </div>
                             <div class="d-flex align-items-center mt-2">
-                                인원수
-                                <div class="people">
-                                    <div @click="peopleChange(-1, i)"><i class="fa-solid fa-minus"></i></div>
-                                    <div>{{people[i]}}</div>
-                                    <div @click="peopleChange(1, i)"><i class="fa-solid fa-plus"></i></div>
+                                <div v-for="i in bosses">
+                                    {{i}}
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-info section_small" @click="reset('boss', i)">
+                            <button type="button" class="btn btn-info section_small" @click="reset('boss', bosses)">
                                 초기화
                             </button>
-                            <button type="button" class="btn btn-danger section_small" @click="deleteBoss(i)">
+                            <button type="button" class="btn btn-danger section_small" @click="deleteBoss(bosses)">
                                 삭제
                             </button>
                         </div>
                     </div>
-                    <div class="bossItem mb-5">
+                    <!--                     <div class="bossItem mb-5">
                         <div v-for="(val, j) in filterItems(items, i)" class="item">
                                 <div class="icon icon_1"
                                     :style="'background: url(./images/'+ val +'.png) no-repeat center'">
@@ -112,7 +231,7 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                                     <div @click="numChange(1, i, val)"><i class="fa-solid fa-plus"></i></div>
                                 </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <div class="underline"></div>
@@ -147,12 +266,14 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                             <span class="eq-edit"><i class="fa-solid fa-pen"></i></span>
                             <input type="text" class="eq-name-input" v-model="eqs[index].tag" />
                         </label>
-                        <button type="button" class="float-end w-auto btn btn-outline-danger remove-circle form-control" @click="deleq(index)">
+                        <button type="button" class="float-end w-auto btn btn-danger remove-circle form-control"
+                            @click="deleq(index)">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                     <div class="input-group">
-                        <select class="form-select" v-model="eqs[index].boss" @change="changeEqBoss(event.target.value, index)">
+                        <select class="form-select" v-model="eqs[index].boss"
+                            @change="changeEqBoss(event.target.value, index)">
                             <option value="" disabled selected>보스 선택</option>
                             <option v-for="i in bossList.slice(2)" :value="i">
                                 {{i}}
@@ -162,11 +283,10 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                             <option value="5">5%</option>
                             <option value="3">3%</option>
                         </select>
-                        <input type="number" class="form-control eq-num" placeholder="인원"
-                            v-model="eqs[index].num" />
+                        <input type="number" class="form-control eq-num" placeholder="인원" v-model="eqs[index].num" />
                     </div>
                     <input type="number" class="form-control eq-price mb-2" placeholder="가격"
-                            v-model="eqs[index].price" />
+                        v-model="eqs[index].price" />
                     <div class="unit" v-if="eqs[index].price && eqs[index].price.length > 0">
                         {{getUnit(eqs[index].price)}}
                     </div>
@@ -216,11 +336,13 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                     <div class="d-flex align-items-center mt-3 section_small">
                         <label class="radio-label">
                             장비 포함
-                            <input type="radio" name="eq-include" value="Y" v-model="eqIncludes" @change="changeEqIncludes"/>
+                            <input type="radio" name="eq-include" value="Y" v-model="eqIncludes"
+                                @change="changeEqIncludes" />
                         </label>
                         <label class="radio-label">
                             장비 따로
-                            <input type="radio" name="eq-include" value="N" v-model="eqIncludes" @change="changeEqIncludes"/>
+                            <input type="radio" name="eq-include" value="N" v-model="eqIncludes"
+                                @change="changeEqIncludes" />
                         </label>
                     </div>
                 </div>
@@ -232,25 +354,27 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                 </span>
             </h5>
             <div>
-                <div v-for="(value, key) in totalEach" :class="'total-unit ' + (rates[key] && rates[key].useYn? 'rate':'')">
+                <div v-for="(value, key) in totalEach"
+                    :class="'total-unit ' + (rates[key] && rates[key].useYn? 'rate':'')">
                     <div :class="'total-box '+(selected.includes(key)?'exist':'')" @click="toggle(key)">
                         <div class="text-center">
-                            {{value.name}} 
-                            <br/><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
+                            {{value.name}}
+                            <br /><span class="section_xs" v-if="value.boss">({{value.boss}})</span>
                         </div>
                         <div>
                             {{getFormat(value.total)}}
                             <div class="d-flex align-items-center section_small" onclick="event.stopPropagation()">
                                 <label class="radio-label me-0">
-                                    <input type="checkbox" name="rate-Yn" :checked="rates[key] && rates[key].useYn" @change="changeRateYn(key, event.target.checked)"/>
+                                    <input type="checkbox" name="rate-Yn" :checked="rates[key] && rates[key].useYn"
+                                        @change="changeRateYn(key, event.target.checked)" />
                                     비율
                                 </label>
                             </div>
                         </div>
                     </div>
                     <div v-if="rates[key] && rates[key].useYn">
-                        <div :class="'total-box rate-box ' + (selected.includes(key + '_' + index)?'exist ':'') + (index == 0 && (i === '' || i == 100)?'danger':'')" @click="toggle(key, '_' + index)" 
-                            v-for="(i, index) in rates[key].rate">
+                        <div :class="'total-box rate-box ' + (selected.includes(key + '_' + index)?'exist ':'') + (index == 0 && (i === '' || i == 100)?'danger':'')"
+                            @click="toggle(key, '_' + index)" v-for="(i, index) in rates[key].rate">
                             <div class="text-center">
                                 {{index == 0?'\'파티장\'의 비율':'다른 파티원'}}
                                 <span v-if="index == 0" class="text-danger">*</span>

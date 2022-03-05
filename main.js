@@ -1,4 +1,3 @@
-
 var dist = new Vue({
     el: "#dist",
     data: {
@@ -29,8 +28,10 @@ var dist = new Vue({
             "magic",
             "ess"
         ],
-        boss: [
-        ],
+        nickname:"",
+        selectedBoss: [],
+        boss: {},
+        chief: "",
         bossList: [
             "노멀 스우",
             "노멀 데미안",
@@ -61,6 +62,53 @@ var dist = new Vue({
     computed: {
         me() {
             return this.eqs[0] && this.eqs[0].tag === '장비1미'?true:false
+        },
+        realPeople: {
+            cache: false,
+            get() {
+                var real = {}
+                for(let i in this.people){
+                    real[i] = this.people[i].filter(a=>a.useYn)
+                }
+                return real
+            }
+        },
+        bosses: {
+            cache: false,
+            get() {
+                var boss = {}
+                for(let i in this.realPeople){
+                    this.realPeople[i].forEach(a=>{
+                        if(boss[a.boss]) boss[a.boss].push(i)
+                        else boss[a.boss] = [i]
+                    })
+                }
+                return boss
+            }
+        },
+        groups: {
+            cache: false,
+            get() {
+                var groups = {}
+                for(let i in this.bosses){
+                    var exist = false
+                    var idx = 1
+                    for(let j in groups){
+                        if(JSON.stringify(groups[j].people.sort()) === JSON.stringify(this.bosses[i].sort())){
+                            exist = true
+                            groups.boss.push(i)
+                            break
+                        }
+                    }
+                    if(!exist){
+                        group['group' + idx] = {
+                            boss: [i],
+                            people: this.bosses[i]
+                        }
+                    }
+                }
+                return boss
+            }
         },
         existYn() {
             const exist = {};
@@ -188,7 +236,7 @@ var dist = new Vue({
     watch: {
         boss: {
             handler(val, oldVal) {
-                let del = Object.keys(this.people).filter(a => !val.includes(a))
+/*                 let del = Object.keys(this.people).filter(a => !val.includes(a))
                 if (del.length > 0) {
                     delete this.people[del[0]]
                 }
@@ -203,7 +251,7 @@ var dist = new Vue({
                     if(!Object.keys(this.totalEach).includes(i)){
                         delete this.rates[i]
                     }
-                }
+                } */
                 localStorage["boss"] = JSON.stringify(val);
             },
             deep: true
@@ -225,6 +273,9 @@ var dist = new Vue({
                 localStorage["people"] = JSON.stringify(val);
             },
             deep: true,
+        },
+        chief(val, oldVal) {
+            localStorage["chief"] = val;
         },
         eqs: {
             handler(val, oldVal) {
@@ -264,17 +315,100 @@ var dist = new Vue({
         }
     },
     methods: {
-        addboss(val) {
-            if (this.boss.includes(val)) {
-
-            } else {
-                this.count = {
-                    ...this.count,
-                    [val]: this.resetCount(val)
+        addBoss(val) {
+            this.selectedBoss = [
+                ...this.selectedBoss,
+                {
+                    boss: val,
+                    rate: "rest",
+                    useYn: true
                 }
-                this.boss.push(val)
-
+            ]
+        },
+        deleteBoss(index, type = 'addPeople', people = null){
+            if(type === 'addPeople'){
+                this.selectedBoss.splice(index, 1)
+            } else{
+                this.people[people].splice(index,1)
             }
+        },
+        addPeople() {
+            if(this.nickname.length == 0){
+                var myToast = Toastify({
+                    text: "닉네임을 입력해주세요.",
+                    duration: 3000
+                })
+                myToast.showToast();
+                return false;         
+            }
+            if(this.people[this.nickname]){
+                var myToast = Toastify({
+                    text: "이미 존재하는 캐릭터입니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+                return false;         
+            }
+            if(document.getElementById("chief").checked && this.chief.length > 0){
+                var myToast = Toastify({
+                    text: "파티장이 이미 존재합니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+                return false;
+            }
+            if(this.selectedBoss.length == 0){
+                var myToast = Toastify({
+                    text: "보스를 선택해주세요.",
+                    duration: 3000
+                })
+                myToast.showToast();
+                return false;
+            }
+            let r = true
+            this.selectedBoss.forEach(a=>{
+                if(a.rate != 'rest' && a.rate >= 100){
+                    var myToast = Toastify({
+                        text: "비율은 100 미만이어야 합니다.",
+                        duration: 3000
+                    })
+                    myToast.showToast();
+                    r = false
+                }
+            })
+            if(!r){
+                return false
+            }
+            this.people = {
+                ...this.people,
+                [this.nickname]: this.selectedBoss
+            }
+            this.chief = document.getElementById("chief").checked?this.nickname:this.chief
+            this.nickname = ""
+            this.selectedBoss = []
+            document.getElementById("chief").checked = false
+        },
+        changeNickname(name){
+            var newName = document.getElementById("nicknameEdit"+name).value
+            var obj = {}
+            for(let i in this.people){
+                if(i !== name){
+                    obj[i] = this.people[i]
+                } else{
+                    obj[newName] = this.people[i]
+                }
+            }
+            this.people = obj
+
+        },
+        changeChief(name){
+            this.people[name] = this.people[name].map(a=>{
+                return {
+                    ...a,
+                    useYn: true
+                }
+            })
+            this.chief = name
         },
         reset(type, boss="") {
             if(type === 'all'){
@@ -305,10 +439,6 @@ var dist = new Vue({
                 } else cnt[i] = 0;
             }
             return cnt
-        },
-        deleteBoss(boss){
-            this.boss = this.boss.filter(a=>a!=boss)
-            delete this.count[boss]
         },
         filterItems(arr, boss){
             var last = 0
@@ -478,6 +608,9 @@ var dist = new Vue({
         if (localStorage.getItem("price")) {
             this.price = JSON.parse(localStorage.getItem("price"));
         }
+        if (localStorage.getItem("chief")) {
+            this.chief = localStorage.getItem("chief");
+        }
         if (localStorage.getItem("people")) {
             this.people = JSON.parse(localStorage.getItem("people"));
         }
@@ -489,10 +622,10 @@ var dist = new Vue({
         }
         if (localStorage.getItem("count")) {
             this.count = JSON.parse(localStorage.getItem("count"));
-        } else {
+        } /* else {
             for (let i of this.boss) {
                 this.count[i] = this.resetCount(i);
             }
-        }
+        } */
     },
 });
