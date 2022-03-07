@@ -222,7 +222,7 @@ ex) 만약 파티장을 포함에서 5명이 18%를 받고, 한명이 10%를 받
                                             </label>
                                             <label class="radio-label">
                                                 비율 설정
-                                                <input type="radio" :name="'extra-rate-yn-'+i.boss" @change="selectedExtraBoss[index].rate = ''"
+                                                <input type="radio" :name="'extra-rate-yn-'+i.boss+'-'+key" @change="selectedExtraBoss[index].rate = ''"
                                                     value="Y" :checked="selectedExtraBoss[index].rate != 'rest'" />
                                             </label>
                                             <div :class="'name name-sm '+(selectedExtraBoss[index].rate >= 100?'danger':'')"
