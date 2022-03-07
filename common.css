@@ -26,7 +26,8 @@ select option[value=""][disabled] {
 }
 .modal-body{
     display: flex;
-    
+    padding-left: 10%;
+    padding-right: 10%;
     align-items: center;
     flex-direction: column;
 }
@@ -122,10 +123,26 @@ select option[value=""][disabled] {
     width: 23px;
     text-align: center;
 }
- .rate-tag{
+.rate-tag{
     width: 40%;
     justify-content: center;
- }
+}
+.add-btn{
+    background: #ced4da;
+    color: white;
+}
+.add-btn:hover{
+    color: white;
+}
+.add-btn:focus{
+    color: white;
+    box-shadow: none;
+    background: #b3b9c0;
+}
+.addBoss-list{
+    max-height: 50vh;
+    overflow: scroll;
+}
 .bossItem{
     width: 100%;
 }

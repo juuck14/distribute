@@ -30,6 +30,7 @@ var dist = new Vue({
         ],
         nickname:"",
         selectedBoss: [],
+        selectedExtraBoss: [],
         boss: {},
         chief: "",
         bossList: [
@@ -90,24 +91,24 @@ var dist = new Vue({
             cache: false,
             get() {
                 var groups = {}
+                var idx = 1
                 for(let i in this.bosses){
                     var exist = false
-                    var idx = 1
                     for(let j in groups){
                         if(JSON.stringify(groups[j].people.sort()) === JSON.stringify(this.bosses[i].sort())){
                             exist = true
-                            groups.boss.push(i)
-                            break
+                            groups[j].boss.push(i)
                         }
                     }
                     if(!exist){
-                        group['group' + idx] = {
+                        groups['group' + idx] = {
                             boss: [i],
                             people: this.bosses[i]
                         }
+                        idx++
                     }
                 }
-                return boss
+                return groups
             }
         },
         existYn() {
@@ -234,25 +235,16 @@ var dist = new Vue({
         },
     },
     watch: {
-        boss: {
+        groups: {
             handler(val, oldVal) {
-/*                 let del = Object.keys(this.people).filter(a => !val.includes(a))
-                if (del.length > 0) {
-                    delete this.people[del[0]]
-                }
-                let add = val.filter(a => !Object.keys(this.people).includes(a))
-                if (add.length > 0) {
-                    this.people = {
-                        ...this.people,
-                        [add[0]]: 6
+                for(let i in val){
+                    if((!oldVal[i] && val[i]) || JSON.stringify(val[i].boss.sort()) !== JSON.stringify(oldVal[i].boss.sort())){
+                        this.count[i] = this.resetCount(val[i].boss)
+                    } else if(oldVal[i] && !val[i]){
+                        delete this.count[i]
                     }
                 }
-                for(let i in this.rates){
-                    if(!Object.keys(this.totalEach).includes(i)){
-                        delete this.rates[i]
-                    }
-                } */
-                localStorage["boss"] = JSON.stringify(val);
+                localStorage["count"] = JSON.stringify(this.count);
             },
             deep: true
         },
@@ -290,6 +282,7 @@ var dist = new Vue({
         },
         count: {
             handler(val, oldVal) {
+                console.log(val)
                 localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
@@ -315,15 +308,62 @@ var dist = new Vue({
         }
     },
     methods: {
-        addBoss(val) {
-            this.selectedBoss = [
-                ...this.selectedBoss,
-                {
-                    boss: val,
-                    rate: "rest",
-                    useYn: true
+        addBoss(val, type = 'addPeople', people = null) {
+            if(type === 'addPeople'){
+                var exist = false
+                this.selectedBoss.forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                if(exist){
+                    var myToast = Toastify({
+                        text: "이미 선택된 보스입니다.",
+                        duration: 3000
+                    })
+                    myToast.showToast();
+                } else{
+                    this.selectedBoss = [
+                        ...this.selectedBoss,
+                        {
+                            boss: val,
+                            rate: "rest",
+                            useYn: true
+                        }
+                    ]
                 }
-            ]
+            } else{
+                var exist = false
+                this.people[people].forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                this.selectedExtraBoss.forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                if(exist){
+                    var myToast = Toastify({
+                        text: "이미 선택된 보스입니다.",
+                        duration: 3000
+                    })
+                    myToast.showToast();
+                } else{
+                    this.selectedExtraBoss = [
+                        ...this.selectedExtraBoss,
+                        {
+                            boss: val,
+                            rate: "rest",
+                            useYn: true
+                        }
+                    ]
+                }
+            }
         },
         deleteBoss(index, type = 'addPeople', people = null){
             if(type === 'addPeople'){
@@ -410,63 +450,73 @@ var dist = new Vue({
             })
             this.chief = name
         },
-        reset(type, boss="") {
+        addExtraBoss(name){
+            this.people[name] = [...this.people[name], ...this.selectedExtraBoss]
+        },
+        reset(type, group="") {
             if(type === 'all'){
                 localStorage.clear();
                 location.reload();
             } else if(type === 'boss'){
                 this.count = {
                     ...this.count,
-                    [boss]: this.resetCount(boss)
+                    [group]: this.resetCount(this.groups[group].boss)
                 }
             }
         },
-        resetCount(boss){
+        resetCount(bosses){
             var cnt = {};
             for (let i of this.items) {
                 if (i === "addcube") {
-                    if (["노멀 스우","노멀 데미안","노멀 가디언 엔젤 슬라임","이지 루시드"].includes(boss)) cnt[i] = 3;
-                    else if (["이지 윌","노멀 루시드"].includes(boss)) cnt[i] = 4;
-                    else if (["노멀 윌"].includes(boss)) cnt[i] = 5;
-                    else if (["노멀 더스크","노멀 듄켈"].includes(boss)) cnt[i] = 6;
-                    else if (["하드 데미안"].includes(boss)) cnt[i] = 7;
-                    else if (["하드 스우"].includes(boss)) cnt[i] = 8;
-                    else if (["하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) cnt[i] = 9;
-                    else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) cnt[i] = 10;
-                    else if (["하드 세렌"].includes(boss)) cnt[i] = 11;
-                    else if (["검은 마법사"].includes(boss)) cnt[i] = 30;
-                    else cnt[i] = 0;
+                    var add = 0
+                    for(let boss of bosses){
+                        if (["노멀 스우","노멀 데미안","노멀 가디언 엔젤 슬라임","이지 루시드"].includes(boss)) add +=  3;
+                        else if (["이지 윌","노멀 루시드"].includes(boss)) add +=  4;
+                        else if (["노멀 윌"].includes(boss)) add +=  5;
+                        else if (["노멀 더스크","노멀 듄켈"].includes(boss)) add +=  6;
+                        else if (["하드 데미안"].includes(boss)) add +=  7;
+                        else if (["하드 스우"].includes(boss)) add +=  8;
+                        else if (["하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) add +=  9;
+                        else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) add +=  10;
+                        else if (["하드 세렌"].includes(boss)) add +=  11;
+                        else if (["검은 마법사"].includes(boss)) add +=  30;
+                        else add +=  0;
+                    }
+                    cnt[i] = add
                 } else cnt[i] = 0;
             }
             return cnt
         },
-        filterItems(arr, boss){
-            var last = 0
-            var remove = 0
-            if (["노멀 스우","노멀 데미안"].includes(boss)) last = 7;
-            else if (["노멀 가디언 엔젤 슬라임","이지 루시드", "이지 윌","노멀 루시드","노멀 윌"].includes(boss)) last = 8;
-            else if (["노멀 더스크","노멀 듄켈"].includes(boss)) last = 9;
-            else if (["하드 스우","하드 데미안","하드 루시드","하드 윌","노멀 진 힐라"].includes(boss)) last = 14;
-            else if (["카오스 가디언 엔젤 슬라임","카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌","하드 세렌","검은 마법사"].includes(boss)) {
-                last = 18;
-                remove = 13;
+        filterItems(arr, bosses){
+            var items = []
+            for(let boss of bosses){
+                var last = 0
+                var remove = 0
+                if (["노멀 스우","노멀 데미안"].includes(boss)) last = 7;
+                else if (["노멀 가디언 엔젤 슬라임","이지 루시드", "이지 윌","노멀 루시드","노멀 윌"].includes(boss)) last = 8;
+                else if (["노멀 더스크","노멀 듄켈"].includes(boss)) last = 9;
+                else if (["하드 스우","하드 데미안","하드 루시드","하드 윌","노멀 진 힐라"].includes(boss)) last = 14;
+                else if (["카오스 가디언 엔젤 슬라임","카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌","하드 세렌","검은 마법사"].includes(boss)) {
+                    last = 18;
+                    remove = 13;
+                }
+                var newArr = arr.slice(0, last)
+                newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
+                items = [...items, ...newArr]
             }
-            var newArr = arr.slice(0, last)
-            
-            newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
-            return newArr
+            return [...new Set(items)]
         },
-        numChange(type, boss, item) {
+        numChange(type, group, item) {
             if (this.count) {
                 this.count = {
                     ...this.count,
-                    [boss]: {
-                        ...this.count[boss],
+                    [group]: {
+                        ...this.count[group],
                         [item]:
-                            this.count[boss][item] +
+                            this.count[group][item] +
                                 type >=
                                 0
-                                ? this.count[boss][
+                                ? this.count[group][
                                     item
                                 ] + type
                                 : 0,
@@ -622,10 +672,6 @@ var dist = new Vue({
         }
         if (localStorage.getItem("count")) {
             this.count = JSON.parse(localStorage.getItem("count"));
-        } /* else {
-            for (let i of this.boss) {
-                this.count[i] = this.resetCount(i);
-            }
-        } */
+        }
     },
 });
