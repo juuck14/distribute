@@ -224,15 +224,6 @@ var dist = new Vue({
                 localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
-        },
-        rates: {
-            handler(val, oldVal) {
-                for(let i in val){
-                    val[i].rate[0] = val[i].rate[0] > 100? 100:val[i].rate[0]
-                    val[i].rate[1] = val[i].rate[1] > 100? 100:val[i].rate[1]
-                }
-            },
-            deep: true,
         }
     },
     methods: {
