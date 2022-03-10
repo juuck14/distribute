@@ -348,6 +348,8 @@ var dist = new Vue({
             this.nickname = ""
             this.selectedBoss = []
             document.getElementById("chief").checked = false
+            document.getElementById("addBoss").value = ""
+            
         },
         deletePeople(name){
             var imsi = JSON.parse(JSON.stringify(this.people))

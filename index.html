@@ -90,7 +90,7 @@
             <div class="mb-4">
                 <!--보스 추가-->
                 <div class="mb-2">보스 추가</div>
-                <select class="form-select w-auto" @change="addBoss(event.target.value)">
+                <select class="form-select w-auto" @change="addBoss(event.target.value)" id="addBoss">
                     <option value="" disabled selected>보스 추가하기</option>
                     <option v-for="i in bossList">{{i}}</option>
                 </select>
