@@ -222,7 +222,6 @@ var dist = new Vue({
         },
         count: {
             handler(val, oldVal) {
-                console.log(val)
                 localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
@@ -291,6 +290,11 @@ var dist = new Vue({
                 this.selectedBoss.splice(index, 1)
             } else{
                 this.people[people].splice(index,1)
+                var myToast = Toastify({
+                    text: "삭제되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
             }
         },
         addPeople() {
@@ -349,12 +353,22 @@ var dist = new Vue({
             this.selectedBoss = []
             document.getElementById("chief").checked = false
             document.getElementById("addBoss").value = ""
+            var myToast = Toastify({
+                text: "파티원이 추가되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
             
         },
         deletePeople(name){
             var imsi = JSON.parse(JSON.stringify(this.people))
             delete imsi[name]
             this.people = imsi
+            var myToast = Toastify({
+                text: "삭제되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
         },
         modalFocus(name){
             document.getElementById('nameEdit'+name).removeEventListener("shown.bs.modal", inputfocus)
@@ -372,6 +386,11 @@ var dist = new Vue({
                     }
                 }
                 this.people = obj
+                var myToast = Toastify({
+                    text: "닉네임이 변경되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
             } else{
                 var myToast = Toastify({
                     text: "이미 존재하는 캐릭터입니다.",
@@ -394,6 +413,11 @@ var dist = new Vue({
         },
         addExtraBoss(name){
             this.people[name] = [...this.people[name], ...this.selectedExtraBoss]
+            var myToast = Toastify({
+                text: "추가되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
         },
         reset(type, group="") {
             if(type === 'all'){
@@ -467,6 +491,7 @@ var dist = new Vue({
             }
         },
         getUnit(n) {
+            n = parseInt(n)
             n = n.toString();
             var r = this.getReverse(n);
             var part = [];
@@ -516,6 +541,11 @@ var dist = new Vue({
         },
         deleq(i) {
             this.eqs.splice(i, 1);
+            var myToast = Toastify({
+                text: "삭제되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
         },
         getRatedTotal(sum, rateObj, chief) {
             //sum: 수수료를 뗀 총합, rateObj: 비율 오브젝트, chief: 파티장의 비율
@@ -554,6 +584,8 @@ var dist = new Vue({
         }
         if (localStorage.getItem("people")) {
             this.people = JSON.parse(localStorage.getItem("people"));
+        } else{
+            this.reCount = true
         }
         if (localStorage.getItem("eqs")) {
             this.eqs = JSON.parse(localStorage.getItem("eqs"));
