@@ -598,6 +598,7 @@ var dist = new Vue({
         }
     },
     created() {
+        localStorage.clear()
         if (localStorage.getItem("boss")) {
             this.boss = JSON.parse(localStorage.getItem("boss"));
         }
