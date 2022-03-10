@@ -177,12 +177,14 @@ var dist = new Vue({
         groups: {
             handler(val, oldVal) {
                 if(this.reCount){
+                    this.count = {}
                     for(let i in val){
-                        if((!oldVal[i] && val[i]) || JSON.stringify(val[i].boss.sort()) !== JSON.stringify(oldVal[i].boss.sort())){
+/*                         if((!oldVal[i] && val[i]) || JSON.stringify(val[i].boss.sort()) !== JSON.stringify(oldVal[i].boss.sort())){
                             this.count[i] = this.resetCount(val[i].boss)
                         } else if(oldVal[i] && !val[i]){
                             delete this.count[i]
-                        }
+                        } */
+                        this.count[i] = this.resetCount(val[i].boss)
                     }
                 } else{
                     this.reCount = true
@@ -483,31 +485,11 @@ var dist = new Vue({
             }
             return r;
         },
-        getTotal(arr) {
-            var total = 0;
-            for (let i of arr) {
-                total += this.total[i]?this.total[i]:0;
-            }
-            return this.getFormat(total);
-        },
         getFormat(n) {
             n = n.toString();
             return (Math.round(n / this.round) * this.round)
                 .toString()
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        },
-        getDiv(n, fee=this.fee) {
-            return (100-fee) / (100 * n - 5);
-        },
-        peopleChange(type, i) {
-            if (this.people) {
-                this.people = {
-                    ...this.people,
-                    [i]: this.people[i] + type >= 1
-                            ? this.people[i] + type
-                            : 1
-                };
-            }
         },
         addeq() {
             this.eqs.push({
@@ -533,48 +515,6 @@ var dist = new Vue({
         deleq(i) {
             this.eqs.splice(i, 1);
         },
-        changeEqIncludes() {
-            this.selected = []
-            this.rates = {}
-        },
-        toggle(k, i = "") {
-            if (this.selected.includes(k + i)) {
-                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
-            } else {
-                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
-                this.selected.push(k + i);
-            }
-        },
-        changeRateYn(key, type) {
-            if (type) {
-                if(this.rates[key]){
-                    this.rates = {
-                        ...this.rates,
-                        [key]: {
-                            ...this.rates[key],
-                            useYn: true
-                        }
-                    }
-                } else{
-                    this.rates = {
-                        ...this.rates,
-                        [key]: {
-                            useYn: true,
-                            rate: ["", ""],
-                            total: ""
-                        }
-                    }
-                }
-            } else {
-                this.rates = {
-                    ...this.rates,
-                    [key]: {
-                        ...this.rates[key],
-                        useYn: false
-                    }
-                }
-            }
-        },
         getRatedTotal(sum, rateObj, chief) {
             //sum: 수수료를 뗀 총합, rateObj: 비율 오브젝트, chief: 파티장의 비율
             var total = {}
@@ -598,7 +538,6 @@ var dist = new Vue({
         }
     },
     created() {
-        localStorage.clear()
         if (localStorage.getItem("boss")) {
             this.boss = JSON.parse(localStorage.getItem("boss"));
         }
