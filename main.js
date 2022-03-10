@@ -364,6 +364,7 @@ var dist = new Vue({
             var imsi = JSON.parse(JSON.stringify(this.people))
             delete imsi[name]
             this.people = imsi
+            if(name === this.chief) this.chief = ""
             var myToast = Toastify({
                 text: "삭제되었습니다.",
                 duration: 3000
