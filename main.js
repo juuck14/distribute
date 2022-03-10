@@ -552,7 +552,7 @@ var dist = new Vue({
             var total = {}
             var rateArr = Object.values(rateObj)
             var rateSum = rateArr.reduce((total, value)=>{
-                return total + (value != "rest" && value != "" ? parseInt(value) : 0)
+                return total + (value != "rest" && value != "" ? parseFloat(value) : 0)
             }, 0)
             var rest = (100 - rateSum) / rateArr.filter(a=>a === "rest").length
             chief = chief === 'rest'?rest:chief
