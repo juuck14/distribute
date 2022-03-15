@@ -57,7 +57,8 @@ var dist = new Vue({
             "검은 마법사"
         ],
         eqOnly: false,
-        inform: ""
+        inform: "",
+        totalEach:{}
     },
     computed: {
         realPeople: {
@@ -128,7 +129,7 @@ var dist = new Vue({
                 })
                 return this.bossList.slice(2).filter(a=>[...new Set(arr)].includes(a))
             }
-        },
+        }/* ,
         totalEach() {
             const total = {};
             for(let group in this.groups){
@@ -168,7 +169,7 @@ var dist = new Vue({
             }
             
             return total;
-        }
+        } */
     },
     watch: {
         groups: {
@@ -540,6 +541,45 @@ var dist = new Vue({
                 duration: 3000
             })
             myToast.showToast();
+        },
+        getTotalEach(){
+            const total = {};
+            for(let group in this.groups){
+                //그룹별 수수료 제외 총합 계산
+                var sum = 0
+                if(!this.eqOnly){
+                    for(let item in this.count[group]){
+                        sum +=
+                        this.count[group][item] *
+                        (this.price[item] && this.price[item] !== ""
+                            ? this.price[item]
+                            : 0);
+                    }
+                    sum = sum * (1 - this.fee)
+                }
+                
+                var thisEq = this.eqs.filter(a=>this.groups[group].boss.includes(a.boss))
+                for(let eq of thisEq){
+                    if(eq.price && eq.price != ""){
+                        sum += eq.price * (1 - eq.fee)
+                    }
+                }
+
+                //파티원별 비율 계산
+                var rateObj = {}
+                var that = this
+                this.groups[group].people.forEach(a=>{
+                    rateObj[a] = that.realPeople[a].filter(b=>b.boss === that.groups[group].boss[0])[0].rate
+                })
+
+                //그룹별 분배금 계산, 총 분배금에 더하기
+                var totalByGroup = this.getRatedTotal(sum, rateObj, rateObj[this.chief])
+                for(let people in totalByGroup){
+                    if(total[people]) total[people] += totalByGroup[people]
+                    else total[people] = totalByGroup[people]
+                }
+            }
+            this.totalEach = total
         },
         getRatedTotal(sum, rateObj, chief) {
             //sum: 수수료를 뗀 총합, rateObj: 비율 오브젝트, chief: 파티장의 비율

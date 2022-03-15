@@ -454,7 +454,7 @@
             </div>
         </div>
         <!--분배-->
-        <div v-if="Object.keys(totalEach).length > 0">
+        <div>
             <div class="underline"></div>
             <h5 class="tag mb-3">
                 <div class="tag-left" id="section7">
@@ -476,7 +476,13 @@
                     </select>
                 </span>
             </h5>
-            <div>
+            <div class="w-100 text-center">
+                <button type="button" class="btn btn-primary mb-3" @click="getTotalEach">
+                    <i class="fa-solid fa-arrow-rotate-right" v-if="Object.keys(totalEach).length > 0"></i>
+                    <template v-else>분배금 계산</template>
+                </button>
+            </div>
+            <div v-if="Object.keys(totalEach).length > 0">
                 <div v-for="(value, key) in totalEach" class='total-unit'>
                     <div class="total-box">
                         <div class="text-center">{{key}}</div>
@@ -484,7 +490,7 @@
                     </div>
                 </div>
             </div>
-            <div class="section_small d-flex mt-1 text-danger">
+            <div class="section_small d-flex mt-1 text-danger" v-if="Object.keys(totalEach).length > 0">
                 *NaN이 나온다면?
                 <button type="button" class="btn-outline-danger btn inform"
                     data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = 'NaN이 나온다면?'">
