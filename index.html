@@ -188,8 +188,8 @@
                     <div class="d-flex align-items-center section_small">
                         <label class="radio-label">
                             1/n
-                            <input type="radio" :name="'rate-yn-'+i.boss+'-'+key" v-model="person[index].rate"
-                                value="rest" checked />
+                            <input type="radio" :name="'rate-yn-'+i.boss+'-'+key" :id="'1'+key+i" @change="person[index].rate = 'rest'"
+                                value="rest" :checked="person[index].rate == 'rest'" />{{person[index].rate == 'rest'?1:2}}
                         </label>
                         <label class="radio-label">
                             비율 설정
@@ -242,7 +242,7 @@
                         <div class="modal-body">
                             <h5 class="mb-5">보스 추가</h5>
                             <div class="mb-4">
-                                <select class="form-select w-auto" @change="addBoss(event.target.value, 'people', key)">
+                                <select class="form-select w-auto" @change="addBoss(event.target.value, 'people', key)" :id="'addBossSelect'+key">
                                     <option value="" disabled selected>보스 추가하기</option>
                                     <option v-for="i in bossList">{{i}}</option>
                                 </select>
@@ -250,7 +250,7 @@
                             <div class="addBoss-list w-100">
                                 <div v-for="(i, index) in selectedExtraBoss" class="w-100">
                                     <button type="button" class="float-end w-auto btn btn-danger remove-circle form-control"
-                                        @click="deleteBoss(index)">
+                                        @click="deleteBoss(index, 'extra')">
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                     <div class="mb-4">

@@ -129,48 +129,45 @@ var dist = new Vue({
                 return this.bossList.slice(2).filter(a=>[...new Set(arr)].includes(a))
             }
         },
-        totalEach: {
-            cache: false,
-            get() {
-                const total = {};
-                /* for(let group in this.groups){
-                    //그룹별 수수료 제외 총합 계산
-                    var sum = 0
-                    if(!this.eqOnly){
-                        for(let item in this.count[group]){
-                            sum +=
-                            this.count[group][item] *
-                            (this.price[item] && this.price[item] !== ""
-                                ? this.price[item]
-                                : 0);
-                        }
-                        sum = sum * (1 - this.fee)
+        totalEach() {
+            const total = {};
+            for(let group in this.groups){
+                //그룹별 수수료 제외 총합 계산
+                var sum = 0
+                if(!this.eqOnly){
+                    for(let item in this.count[group]){
+                        sum +=
+                        this.count[group][item] *
+                        (this.price[item] && this.price[item] !== ""
+                            ? this.price[item]
+                            : 0);
                     }
-                    
-                    var thisEq = this.eqs.filter(a=>this.groups[group].boss.includes(a.boss))
-                    for(let eq of thisEq){
-                        if(eq.price && eq.price != ""){
-                            sum += eq.price * (1 - eq.fee)
-                        }
-                    }
-
-                    //파티원별 비율 계산
-                    var rateObj = {}
-                    var that = this
-                    this.groups[group].people.forEach(a=>{
-                        rateObj[a] = that.realPeople[a].filter(b=>b.boss === that.groups[group].boss[0])[0].rate
-                    })
-
-                    //그룹별 분배금 계산, 총 분배금에 더하기
-                    var totalByGroup = this.getRatedTotal(sum, rateObj, rateObj[this.chief])
-                    for(let people in totalByGroup){
-                        if(total[people]) total[people] += totalByGroup[people]
-                        else total[people] = totalByGroup[people]
-                    }
-                } */
+                    sum = sum * (1 - this.fee)
+                }
                 
-                return total;
+                var thisEq = this.eqs.filter(a=>this.groups[group].boss.includes(a.boss))
+                for(let eq of thisEq){
+                    if(eq.price && eq.price != ""){
+                        sum += eq.price * (1 - eq.fee)
+                    }
+                }
+
+                //파티원별 비율 계산
+                var rateObj = {}
+                var that = this
+                this.groups[group].people.forEach(a=>{
+                    rateObj[a] = that.realPeople[a].filter(b=>b.boss === that.groups[group].boss[0])[0].rate
+                })
+
+                //그룹별 분배금 계산, 총 분배금에 더하기
+                var totalByGroup = this.getRatedTotal(sum, rateObj, rateObj[this.chief])
+                for(let people in totalByGroup){
+                    if(total[people]) total[people] += totalByGroup[people]
+                    else total[people] = totalByGroup[people]
+                }
             }
+            
+            return total;
         }
     },
     watch: {
@@ -288,6 +285,8 @@ var dist = new Vue({
         deleteBoss(index, type = 'addPeople', people = null){
             if(type === 'addPeople'){
                 this.selectedBoss.splice(index, 1)
+            } else if(type === 'extra'){
+                this.selectedExtraBoss.splice(index, 1)
             } else{
                 this.people[people].splice(index,1)
                 var myToast = Toastify({
@@ -353,11 +352,7 @@ var dist = new Vue({
             this.selectedBoss = []
             document.getElementById("chief").checked = false
             document.getElementById("addBoss").value = ""
-            var myToast = Toastify({
-                text: "파티원이 추가되었습니다.",
-                duration: 3000
-            })
-            myToast.showToast();
+            location.reload();
             
         },
         deletePeople(name){
@@ -365,11 +360,7 @@ var dist = new Vue({
             delete imsi[name]
             this.people = imsi
             if(name === this.chief) this.chief = ""
-            var myToast = Toastify({
-                text: "삭제되었습니다.",
-                duration: 3000
-            })
-            myToast.showToast();
+            location.reload();
         },
         modalFocus(name){
             document.getElementById('nameEdit'+name).removeEventListener("shown.bs.modal", inputfocus)
@@ -387,6 +378,7 @@ var dist = new Vue({
                     }
                 }
                 this.people = obj
+                if(name === this.chief) this.chief = newName
                 var myToast = Toastify({
                     text: "닉네임이 변경되었습니다.",
                     duration: 3000
@@ -414,6 +406,7 @@ var dist = new Vue({
         },
         addExtraBoss(name){
             this.people[name] = [...this.people[name], ...this.selectedExtraBoss]
+            document.getElementById("addBossSelect"+name).value = ""
             var myToast = Toastify({
                 text: "추가되었습니다.",
                 duration: 3000
