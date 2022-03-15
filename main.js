@@ -133,7 +133,7 @@ var dist = new Vue({
             cache: false,
             get() {
                 const total = {};
-                for(let group in this.groups){
+                /* for(let group in this.groups){
                     //그룹별 수수료 제외 총합 계산
                     var sum = 0
                     if(!this.eqOnly){
@@ -167,7 +167,7 @@ var dist = new Vue({
                         if(total[people]) total[people] += totalByGroup[people]
                         else total[people] = totalByGroup[people]
                     }
-                }
+                } */
                 
                 return total;
             }
@@ -189,40 +189,40 @@ var dist = new Vue({
                 } else{
                     this.reCount = true
                 }
-                // localStorage["count"] = JSON.stringify(this.count);
+                localStorage["count"] = JSON.stringify(this.count);
             },
             deep: true
         },
         fee(val, oldVal) {
-            // localStorage["fee"] = val;
+            localStorage["fee"] = val;
         }, 
         round(val, oldVal) {
-            // localStorage["round"] = val;
+            localStorage["round"] = val;
         }, 
         price: {
             handler(val, oldVal) {
-                // localStorage["price"] = JSON.stringify(val);
+                localStorage["price"] = JSON.stringify(val);
             },
             deep: true,
         },
         people: {
             handler(val, oldVal) {
-                // localStorage["people"] = JSON.stringify(val);
+                localStorage["people"] = JSON.stringify(val);
             },
             deep: true,
         },
         chief(val, oldVal) {
-            // localStorage["chief"] = val;
+            localStorage["chief"] = val;
         },
         eqs: {
             handler(val, oldVal) {
-                // localStorage["eqs"] = JSON.stringify(val);
+                localStorage["eqs"] = JSON.stringify(val);
             },
             deep: true,
         },
         count: {
             handler(val, oldVal) {
-                // localStorage["count"] = JSON.stringify(val);
+                localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
         }
