@@ -475,6 +475,11 @@
                     <select class="form-select mb-3 section_small" v-model="round">
                         <option v-for="i in 8">{{10**(i-1)}}</option>
                     </select>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-primary" @click="saveResult">저장</button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" 
+                        data-bs-target="#savedList" @click="saved.sort((a,b) => b.time - a.time)">목록</button>
+                    </div>
                 </span>
             </h5>
             <div class="w-100 text-center">
@@ -497,6 +502,39 @@
                     data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = 'NaN이 나온다면?'">
                     <i class="fa-solid fa-question"></i>
                 </button>
+            </div>
+            <!--저장 목록 모달-->
+            <div class="modal fade" tabindex="0" id="savedList">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <h5 class="mb-5">저장 목록</h5>
+                            <div class="addBoss-list w-100">
+                                <div v-for="(i, index) in saved" class="mb-5">
+                                    <div class="mb-2 d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa-solid fa-clock me-1"></i> 
+                                            {{getDateFormat(i.time)}}
+                                        </div>
+                                        <button type="button" class="float-end w-auto btn btn-danger remove-circle-sm form-control"
+                                            @click="deleteSaved(index)">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div v-for="(value, key) in i.val" class='total-unit'>
+                                        <div class="total-box">
+                                            <div class="text-center">{{key}}</div>
+                                            <div>{{getFormat(value)}}메소</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">닫기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="footer">

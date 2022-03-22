@@ -58,7 +58,8 @@ var dist = new Vue({
         ],
         eqOnly: false,
         inform: "",
-        totalEach:{}
+        totalEach:{},
+        saved: []
     },
     computed: {
         realPeople: {
@@ -129,47 +130,7 @@ var dist = new Vue({
                 })
                 return this.bossList.slice(2).filter(a=>[...new Set(arr)].includes(a))
             }
-        }/* ,
-        totalEach() {
-            const total = {};
-            for(let group in this.groups){
-                //그룹별 수수료 제외 총합 계산
-                var sum = 0
-                if(!this.eqOnly){
-                    for(let item in this.count[group]){
-                        sum +=
-                        this.count[group][item] *
-                        (this.price[item] && this.price[item] !== ""
-                            ? this.price[item]
-                            : 0);
-                    }
-                    sum = sum * (1 - this.fee)
-                }
-                
-                var thisEq = this.eqs.filter(a=>this.groups[group].boss.includes(a.boss))
-                for(let eq of thisEq){
-                    if(eq.price && eq.price != ""){
-                        sum += eq.price * (1 - eq.fee)
-                    }
-                }
-
-                //파티원별 비율 계산
-                var rateObj = {}
-                var that = this
-                this.groups[group].people.forEach(a=>{
-                    rateObj[a] = that.realPeople[a].filter(b=>b.boss === that.groups[group].boss[0])[0].rate
-                })
-
-                //그룹별 분배금 계산, 총 분배금에 더하기
-                var totalByGroup = this.getRatedTotal(sum, rateObj, rateObj[this.chief])
-                for(let people in totalByGroup){
-                    if(total[people]) total[people] += totalByGroup[people]
-                    else total[people] = totalByGroup[people]
-                }
-            }
-            
-            return total;
-        } */
+        }
     },
     watch: {
         groups: {
@@ -177,11 +138,6 @@ var dist = new Vue({
                 if(this.reCount){
                     this.count = {}
                     for(let i in val){
-/*                         if((!oldVal[i] && val[i]) || JSON.stringify(val[i].boss.sort()) !== JSON.stringify(oldVal[i].boss.sort())){
-                            this.count[i] = this.resetCount(val[i].boss)
-                        } else if(oldVal[i] && !val[i]){
-                            delete this.count[i]
-                        } */
                         this.count[i] = this.resetCount(val[i].boss)
                     }
                 } else{
@@ -601,6 +557,26 @@ var dist = new Vue({
                 total[i] = sum * memR * (target / (100 - chief))//파티원에서 target의 비율
             }
             return total;
+        },
+        saveResult(){
+            if(Object.keys(this.totalEach).length > 0){
+                const date = new Date(+new Date() + 3240 * 10000).toISOString().split("T")[0]
+                const time = new Date().toTimeString().split(" ")[0];
+    
+                var t = date + ' ' + time
+                this.saved = [...this.saved, {
+                    time: t.replace(/-/g, "").replace(/:/g, "").replace(/ /g, ""),
+                    val: this.totalEach
+                }]
+                localStorage["saved"] = JSON.stringify(this.saved);
+            }
+        },
+        deleteSaved(index){
+            this.saved.splice(index, 1)
+            localStorage["saved"] = JSON.stringify(this.saved);
+        },
+        getDateFormat(val){
+            return val.substr(0,4) + '-' + val.substr(4,2) + '-' + val.substr(6,2) + ' ' + val.substr(8,2) + ':' + val.substr(10,2) + ':' + val.substr(12,2)
         }
     },
     created() {
@@ -630,6 +606,9 @@ var dist = new Vue({
         if (localStorage.getItem("count")) {
             this.reCount = false
             this.count = JSON.parse(localStorage.getItem("count"));
+        }
+        if (localStorage.getItem("saved")) {
+            this.saved = JSON.parse(localStorage.getItem("saved"));
         }
     },
 });
