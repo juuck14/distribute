@@ -569,11 +569,27 @@ var dist = new Vue({
                     val: this.totalEach
                 }]
                 localStorage["saved"] = JSON.stringify(this.saved);
+                var myToast = Toastify({
+                    text: "저장되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+            } else{
+                var myToast = Toastify({
+                    text: "결과가 없습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
             }
         },
         deleteSaved(index){
             this.saved.splice(index, 1)
             localStorage["saved"] = JSON.stringify(this.saved);
+            var myToast = Toastify({
+                text: "삭제되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
         },
         getDateFormat(val){
             return val.substr(0,4) + '-' + val.substr(4,2) + '-' + val.substr(6,2) + ' ' + val.substr(8,2) + ':' + val.substr(10,2) + ':' + val.substr(12,2)
