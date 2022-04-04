@@ -379,6 +379,12 @@ var dist = new Vue({
                     ...this.count,
                     [group]: this.resetCount(this.groups[group].boss)
                 }
+            } else if(type === 'bossAll'){
+                for(let i in this.count){
+                    this.count[i] = this.resetCount(this.groups[i].boss)
+                }
+            } else if(type === 'price'){
+                this.price = {}
             }
         },
         resetCount(bosses){

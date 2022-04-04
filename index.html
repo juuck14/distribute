@@ -323,13 +323,19 @@
         <!--보스-->
         <div v-if="!eqOnly">
             <div class="underline"></div>
-            <h5 class="mb-4" id="section4">
-                아이템
-                <button type="button" class="btn-outline-secondary btn inform"
-                    data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = '아이템'">
-                    <i class="fa-solid fa-question"></i>
-                </button>
+            <h5 class="mb-4 justify-content-between" id="section4">
+                <div class="d-flex align-items-center">
+                    아이템
+                    <button type="button" class="btn-outline-secondary btn inform"
+                        data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = '아이템'">
+                        <i class="fa-solid fa-question"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-info float-end" @click="reset('bossAll')">초기화</button>
             </h5>
+            <span>
+                
+            </span>
             <div v-if="Object.keys(count).length > 0">
                 <div class="section_small">
                     <div class="boss-input" v-for="(i, key) in groups">
@@ -378,12 +384,15 @@
             </div>
             <div class="underline"></div>
             <!--시세-->
-            <h5 class="mb-3" id="section5">
-                시세
-                <button type="button" class="btn-outline-secondary btn inform"
-                    data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = '시세'">
-                    <i class="fa-solid fa-question"></i>
-                </button>
+            <h5 class="mb-3 justify-content-between" id="section5">
+                <div class="d-flex align-items-center">
+                    시세
+                    <button type="button" class="btn-outline-secondary btn inform"
+                        data-bs-toggle="modal" data-bs-target="#myModal" @click="inform = '시세'">
+                        <i class="fa-solid fa-question"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-info float-end" @click="reset('price')">초기화</button>
             </h5>
             <div class="section_2line">
                 <div class="price-input" v-for="(i, index) in items">
