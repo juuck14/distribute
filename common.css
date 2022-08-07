@@ -5,6 +5,7 @@
     font-weight: normal;
 } 
 body{
+    position: relative;
     font-family: 'maplestory';
     max-width: 768px;
     margin: auto;
@@ -14,9 +15,30 @@ body{
 select option[value=""][disabled] {
 	display: none;
 }
+h5{
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+.hh5{
+    display: flex;
+    align-items: center;
+}
+.inform{
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+    font-size: 0.83rem;
+    border: 2px solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 0.3rem;
+    padding: 0;
+}
 .head{
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 10px;
 }
 .author{
@@ -26,16 +48,21 @@ select option[value=""][disabled] {
 }
 .modal-body{
     display: flex;
-    
+    padding-left: 10%;
+    padding-right: 10%;
     align-items: center;
     flex-direction: column;
 }
+.modal-body.modal-body-desc{
+    padding-left: 10%;
+    padding-right: 10%;
+    display: block
+}
 .desc{
-    border: none !important;
-    outline: none !important;
-    width: 90%;
-    height: 80vh;
-    resize: none;
+    white-space: pre-line;
+    text-align: left;
+    line-height: 1.8rem;
+    word-break: keep-all;
 }
 .btn-info{
     color: white !important;
@@ -80,7 +107,8 @@ select option[value=""][disabled] {
 .underline{
     margin: 25px 0 40px 0;
     background: gray;
-    height: 1px;
+    height: 2px;
+    border-radius: 2px;
 }
 .section_xs{
     font-size: 0.5rem;
@@ -91,11 +119,20 @@ select option[value=""][disabled] {
 .section_small{
     font-size: 0.875rem;
 }
+.keep-all{
+    word-break: keep-all;
+}
+.text-danger.section_small{
+    white-space: nowrap;
+}
 .section_small.section_small_important{
     font-size: 0.875rem !important;
 }
 .section_normal{
     font-size: 1rem;
+}
+.section_lg.section_lg_important{
+    font-size: 1.2rem !important;
 }
 .tag{
     display: flex;
@@ -105,6 +142,10 @@ select option[value=""][disabled] {
 .tag-left{
     display: flex;
     flex-direction: column;
+    max-width: calc(100% - 62px);
+}
+.form-control:disabled, .form-control[readonly] {
+    background-color: inherit !important;
 }
 .people{
     display: flex;
@@ -119,10 +160,33 @@ select option[value=""][disabled] {
     width: 23px;
     text-align: center;
 }
- .rate-tag{
+.rate-tag{
     width: 40%;
     justify-content: center;
- }
+}
+.add-btn{
+    background: #ced4da;
+    color: white;
+}
+.add-btn:hover{
+    color: white;
+}
+.add-btn:focus{
+    color: white;
+    box-shadow: none;
+    background: #b3b9c0;
+}
+.addBoss-list{
+    max-height: 50vh;
+    overflow: scroll;
+}
+.boss-badge{
+    background: transparent !important;
+    border: 2px solid;
+    font-weight: inherit; 
+    font-size: inherit;
+    color: black !important;
+}
 .bossItem{
     width: 100%;
 }
@@ -185,8 +249,11 @@ select option[value=""][disabled] {
     position:relative;
     width: 50%;
 }
+.name-sm > label{
+    position:relative;
+}
 .name.name-sm{
-    width: 20%;
+    width: 25%;
 }
 .name-input{
     border: none;
@@ -195,17 +262,20 @@ select option[value=""][disabled] {
     border-bottom: 1px solid gray;
     padding-right: 25px !important; 
     border-radius: unset;
+    background-color: transparent;
 }
 .name-input:focus{
     box-shadow: none;
+    background-color: transparent;
 }
 .name-input:focus-visible{
     outline: none;
+    background-color: transparent;
 }
 .name-edit{
     position: absolute;
     height: 27px;
-    right: 5px;
+    right: 0;
     line-height: 27px;
 }
 .name-edit-lg{
@@ -230,6 +300,17 @@ select option[value=""][disabled] {
     height: 25px;
     border-radius: 20px;
 }
+.remove-circle-right{
+    margin-left: auto;
+    margin-right: 0;
+}
+.remove-circle-sm{
+    padding: 0;
+    font-size: 0.83rem;
+    width: 20px !important;
+    height: 20px;
+    border-radius: 20px;
+}
 .eq-item div select:nth-child(1){
     width: 50% !important;
     border-radius: 0.25rem 0 0 0;
@@ -242,9 +323,6 @@ select option[value=""][disabled] {
     border-radius: 0 0 0.25rem 0.25rem;
 }
 .eq-fee{
-    width: 25% !important;
-}
-.eq-num{
     width: 25% !important;
     border-radius: 0 0.25rem 0 0;
 }
@@ -276,7 +354,7 @@ select option[value=""][disabled] {
 }
 
 .total-box > div:nth-child(1){
-    width: 35%;
+    width: 40%;
     background: #e9ecef;
     border: 1px solid #ced4da;
     padding: 5px;
@@ -292,7 +370,7 @@ select option[value=""][disabled] {
     display: flex;
     align-items: center;
     padding: 0 15px;
-    width: 65%;
+    width: 60%;
     border: 1px solid #ced4da;
     justify-content: space-between;
 }

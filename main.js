@@ -1,13 +1,12 @@
 var dist = new Vue({
     el: "#dist",
     data: {
-        fee:5,
+        fee:0.05,
         price: {},
-        selected: [],
         people: {},
-        imsiPeople: {},
         eqs: [],
         count: {},
+        reCount: false,
         round: 10000,
         items: [
             "extra",
@@ -31,7 +30,7 @@ var dist = new Vue({
         ],
         nickname:"",
         selectedBoss: [],
-        boss: {},
+        selectedExtraBoss: [],
         chief: "",
         bossList: [
             "노멀 스우",
@@ -57,12 +56,58 @@ var dist = new Vue({
             // "카오스 칼로스",
             "검은 마법사"
         ],
-        eqIncludes: 'Y',
-        rates:{}
+        eqOnly: false,
+        inform: "",
+        totalEach:{},
+        saved: []
     },
     computed: {
-        me() {
-            return this.eqs[0] && this.eqs[0].tag === '장비1미'?true:false
+        realPeople: {
+            cache: false,
+            get() {
+                var real = {}
+                for(let i in this.people){
+                    real[i] = this.people[i].filter(a=>a.useYn)
+                }
+                return real
+            }
+        },
+        bosses: {
+            cache: false,
+            get() {
+                var boss = {}
+                for(let i in this.realPeople){
+                    this.realPeople[i].forEach(a=>{
+                        if(boss[a.boss]) boss[a.boss].push(i)
+                        else boss[a.boss] = [i]
+                    })
+                }
+                return boss
+            }
+        },
+        groups: {
+            cache: false,
+            get() {
+                var groups = {}
+                var idx = 1
+                for(let i in this.bosses){
+                    var exist = false
+                    for(let j in groups){
+                        if(JSON.stringify(groups[j].people.sort()) === JSON.stringify(this.bosses[i].sort())){
+                            exist = true
+                            groups[j].boss.push(i)
+                        }
+                    }
+                    if(!exist){
+                        groups['group' + idx] = {
+                            boss: [i],
+                            people: this.bosses[i]
+                        }
+                        idx++
+                    }
+                }
+                return groups
+            }
         },
         existYn() {
             const exist = {};
@@ -76,137 +121,29 @@ var dist = new Vue({
             }
             return exist;
         },
-        total() {
-            const tot = {};
-            if (Object.keys(this.count).length > 0) {
-                for (let i in this.count) {
-                    var bunbae = 0;
-                    for (let j in this.count[i]) {
-                        bunbae +=
-                            this.count[i][j] *
-                            (this.price[j] || this.price[j] == ""
-                                ? this.price[j]
-                                : 0);
-                    }
-                    bunbae *= this.getDiv(this.people[i]);
-                    for (let j of this.eqs) {
-                        if (
-                            j.boss === i &&
-                            j.price != "" &&
-                            j.num != ""
-                        ) {
-                            bunbae += j.price * this.getDiv(j.num);
-                        }
-                    }
-                    tot[i] = bunbae;
-                }
-            }
-            return tot;
-        },
-        totalEach: {
+        totalBossList: {
             cache: false,
             get() {
-                const tot = {};
-                if (Object.keys(this.count).length > 0) {
-                    for (let i in this.count) {
-                        var bunbae = 0;
-                        for (let j in this.count[i]) {
-                            bunbae +=
-                                this.count[i][j] *
-                                (this.price[j] || this.price[j] == ""
-                                    ? this.price[j]
-                                    : 0);
-                        }
-                        var sum = bunbae * ((100 - this.fee)/100)
-                        bunbae *= this.getDiv(this.people[i]);
-                        tot[i] = {
-                            name: i,
-                            total: bunbae,
-                            sum: sum
-                        };
-                    }
-                }
-                for (let i of this.eqs) {
-                    var bunbae = 0;
-                    var sum = 0
-                    if (i.price && i.num && i.price != "" && i.num != "") {
-                        sum += i.price * ((100 - i.fee)/100)
-                        bunbae += i.price * this.getDiv(i.num, i.fee);
-                    }
-                    if(i.boss && i.price && i.num && i.boss != "" && i.price != "" && i.num != ""){
-                        if(this.eqIncludes === 'Y'){
-                            tot[i.boss] = {
-                                name: i.boss,
-                                total: bunbae + (tot[i.boss]?tot[i.boss].total:0),
-                                sum: sum + (tot[i.boss]?tot[i.boss].sum:0)
-                            };
-                        } else{
-                            tot['eq' + i.index] = {
-                                name: i.tag,
-                                total: bunbae,
-                                boss: i.boss,
-                                sum: sum
-                            };
-                        }
-                    }
-                }
-                return tot;
+                var arr = []
+                Object.values(this.groups).forEach(a=>{
+                    arr = [...arr, ...a.boss]
+                })
+                return this.bossList.slice(2).filter(a=>[...new Set(arr)].includes(a))
             }
-        },
-        ratedTotal() {
-            var tot = {}
-            for(let i in this.rates){
-                if(this.rates[i].useYn){
-                    var sum = 0;
-                    if(this.totalEach[i]){
-                        sum = this.totalEach[i].sum
-                        var total = []
-                        total[0] = this.rates[i].rate[0] != ""?this.getRatedTotal(sum, this.rates[i].rate[0]):0
-                        if(this.rates[i].rate[0] == "" && this.rates[i].rate[1] != ""){
-                            total[1] = 0
-                        } else{
-                            total[1] = this.rates[i].rate[1] != ""?this.getRatedTotal(sum, this.rates[i].rate[0], this.rates[i].rate[1]):0
-                        }
-                        tot[i] = total
-                    }
-                }
-            }
-            return tot
-        },
-        realTotal() {
-            var sum = 0;
-            var that = this;
-            this.selected.forEach((a) => {
-                if(a.split('_')[1]){
-                    if(that.ratedTotal[a.split('_')[0]]){
-                        sum += that.ratedTotal[a.split('_')[0]][a.split('_')[1]];
-                    }
-                } else sum += that.totalEach[a].total;
-                
-            });
-            return sum;
-        },
+        }
     },
     watch: {
-        boss: {
+        groups: {
             handler(val, oldVal) {
-/*                 let del = Object.keys(this.people).filter(a => !val.includes(a))
-                if (del.length > 0) {
-                    delete this.people[del[0]]
-                }
-                let add = val.filter(a => !Object.keys(this.people).includes(a))
-                if (add.length > 0) {
-                    this.people = {
-                        ...this.people,
-                        [add[0]]: 6
+                if(this.reCount){
+                    this.count = {}
+                    for(let i in val){
+                        this.count[i] = this.resetCount(val[i].boss)
                     }
+                } else{
+                    this.reCount = true
                 }
-                for(let i in this.rates){
-                    if(!Object.keys(this.totalEach).includes(i)){
-                        delete this.rates[i]
-                    }
-                } */
-                localStorage["boss"] = JSON.stringify(val);
+                localStorage["count"] = JSON.stringify(this.count);
             },
             deep: true
         },
@@ -224,19 +161,16 @@ var dist = new Vue({
         },
         people: {
             handler(val, oldVal) {
-                this.imsiPeople = val
                 localStorage["people"] = JSON.stringify(val);
             },
             deep: true,
         },
+        chief(val, oldVal) {
+            localStorage["chief"] = val;
+        },
         eqs: {
             handler(val, oldVal) {
                 localStorage["eqs"] = JSON.stringify(val);
-                for(let i in this.rates){
-                    if(!Object.keys(this.totalEach).includes(i)){
-                        delete this.rates[i]
-                    }
-                }
             },
             deep: true,
         },
@@ -245,40 +179,79 @@ var dist = new Vue({
                 localStorage["count"] = JSON.stringify(val);
             },
             deep: true,
-        },
-        rates: {
-            handler(val, oldVal) {
-                for(let i in val){
-                    val[i].rate[0] = val[i].rate[0] > 100? 100:val[i].rate[0]
-                    val[i].rate[1] = val[i].rate[1] > 100? 100:val[i].rate[1]
-                }
-            },
-            deep: true,
-        },
-        totalEach: {
-            handler(val, oldVal) {
-                for(let i of this.selected){
-                    if(!Object.keys(val).includes(i)){
-                        this.selected = this.selected.filter(a => a != i);
-                    }
-                }
-            },
-            deep: true,
         }
     },
     methods: {
-        addBoss(val) {
-            this.selectedBoss = [
-                ...this.selectedBoss,
-                {
-                    boss: val,
-                    rate: "rest",
-                    useYn: true
+        addBoss(val, type = 'addPeople', people = null) {
+            if(type === 'addPeople'){
+                var exist = false
+                this.selectedBoss.forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                if(exist){
+                    var myToast = Toastify({
+                        text: "이미 선택된 보스입니다.",
+                        duration: 3000
+                    })
+                    myToast.showToast();
+                } else{
+                    this.selectedBoss = [
+                        ...this.selectedBoss,
+                        {
+                            boss: val,
+                            rate: "rest",
+                            useYn: true
+                        }
+                    ]
                 }
-            ]
+            } else{
+                var exist = false
+                this.people[people].forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                this.selectedExtraBoss.forEach(a=>{
+                    if(a.boss === val){
+                        exist = true
+                        return false
+                    }
+                })
+                if(exist){
+                    var myToast = Toastify({
+                        text: "이미 선택된 보스입니다.",
+                        duration: 3000
+                    })
+                    myToast.showToast();
+                } else{
+                    this.selectedExtraBoss = [
+                        ...this.selectedExtraBoss,
+                        {
+                            boss: val,
+                            rate: "rest",
+                            useYn: true
+                        }
+                    ]
+                }
+            }
         },
-        deleteBoss(index){
-            this.selectedBoss.splice(index, 1)
+        deleteBoss(index, type = 'addPeople', people = null){
+            if(type === 'addPeople'){
+                this.selectedBoss.splice(index, 1)
+            } else if(type === 'extra'){
+                this.selectedExtraBoss.splice(index, 1)
+            } else{
+                this.people[people].splice(index,1)
+                var myToast = Toastify({
+                    text: "삭제되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+            }
         },
         addPeople() {
             if(this.nickname.length == 0){
@@ -335,64 +308,138 @@ var dist = new Vue({
             this.nickname = ""
             this.selectedBoss = []
             document.getElementById("chief").checked = false
+            document.getElementById("addBoss").value = ""
+            location.reload();
+            
         },
-        reset(type, boss="") {
+        deletePeople(name){
+            var imsi = JSON.parse(JSON.stringify(this.people))
+            delete imsi[name]
+            this.people = imsi
+            if(name === this.chief) this.chief = ""
+            location.reload();
+        },
+        modalFocus(name){
+            document.getElementById('nameEdit'+name).removeEventListener("shown.bs.modal", inputfocus)
+            document.getElementById('nameEdit'+name).addEventListener("shown.bs.modal", inputfocus)
+        },
+        changeNickname(name){
+            var newName = document.getElementById("nicknameEdit"+name).value
+            var obj = {}
+            if(!this.people[newName]){
+                for(let i in this.people){
+                    if(i !== name){
+                        obj[i] = this.people[i]
+                    } else{
+                        obj[newName] = this.people[i]
+                    }
+                }
+                this.people = obj
+                if(name === this.chief) this.chief = newName
+                var myToast = Toastify({
+                    text: "닉네임이 변경되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+            } else{
+                var myToast = Toastify({
+                    text: "이미 존재하는 캐릭터입니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+                return false;  
+            }
+
+        },
+        changeChief(name, target){
+            this.people[name] = this.people[name].map(a=>{
+                return {
+                    ...a,
+                    useYn: true
+                }
+            })
+            this.chief = name
+            target.checked = true
+        },
+        addExtraBoss(name){
+            this.people[name] = [...this.people[name], ...this.selectedExtraBoss]
+            document.getElementById("addBossSelect"+name).value = ""
+            var myToast = Toastify({
+                text: "추가되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
+        },
+        reset(type, group="") {
             if(type === 'all'){
                 localStorage.clear();
                 location.reload();
             } else if(type === 'boss'){
                 this.count = {
                     ...this.count,
-                    [boss]: this.resetCount(boss)
+                    [group]: this.resetCount(this.groups[group].boss)
                 }
+            } else if(type === 'bossAll'){
+                for(let i in this.count){
+                    this.count[i] = this.resetCount(this.groups[i].boss)
+                }
+            } else if(type === 'price'){
+                this.price = {}
             }
         },
-        resetCount(boss){
+        resetCount(bosses){
             var cnt = {};
             for (let i of this.items) {
                 if (i === "addcube") {
-                    if (["노멀 스우","노멀 데미안","노멀 가디언 엔젤 슬라임","이지 루시드"].includes(boss)) cnt[i] = 3;
-                    else if (["이지 윌","노멀 루시드"].includes(boss)) cnt[i] = 4;
-                    else if (["노멀 윌"].includes(boss)) cnt[i] = 5;
-                    else if (["노멀 더스크","노멀 듄켈"].includes(boss)) cnt[i] = 6;
-                    else if (["하드 데미안"].includes(boss)) cnt[i] = 7;
-                    else if (["하드 스우"].includes(boss)) cnt[i] = 8;
-                    else if (["하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) cnt[i] = 9;
-                    else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) cnt[i] = 10;
-                    else if (["하드 세렌"].includes(boss)) cnt[i] = 11;
-                    else if (["검은 마법사"].includes(boss)) cnt[i] = 30;
-                    else cnt[i] = 0;
+                    var add = 0
+                    for(let boss of bosses){
+                        if (["노멀 스우","노멀 데미안","노멀 가디언 엔젤 슬라임","이지 루시드"].includes(boss)) add +=  3;
+                        else if (["이지 윌","노멀 루시드"].includes(boss)) add +=  4;
+                        else if (["노멀 윌"].includes(boss)) add +=  5;
+                        else if (["노멀 더스크","노멀 듄켈"].includes(boss)) add +=  6;
+                        else if (["하드 데미안"].includes(boss)) add +=  7;
+                        else if (["하드 스우"].includes(boss)) add +=  8;
+                        else if (["하드 루시드","하드 윌","카오스 가디언 엔젤 슬라임","노멀 진 힐라"].includes(boss)) add +=  9;
+                        else if (["카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌"].includes(boss)) add +=  10;
+                        else if (["하드 세렌"].includes(boss)) add +=  11;
+                        else if (["검은 마법사"].includes(boss)) add +=  30;
+                        else add +=  0;
+                    }
+                    cnt[i] = add
                 } else cnt[i] = 0;
             }
             return cnt
         },
-        filterItems(arr, boss){
-            var last = 0
-            var remove = 0
-            if (["노멀 스우","노멀 데미안"].includes(boss)) last = 7;
-            else if (["노멀 가디언 엔젤 슬라임","이지 루시드", "이지 윌","노멀 루시드","노멀 윌"].includes(boss)) last = 8;
-            else if (["노멀 더스크","노멀 듄켈"].includes(boss)) last = 9;
-            else if (["하드 스우","하드 데미안","하드 루시드","하드 윌","노멀 진 힐라"].includes(boss)) last = 14;
-            else if (["카오스 가디언 엔젤 슬라임","카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌","하드 세렌","검은 마법사"].includes(boss)) {
-                last = 18;
-                remove = 13;
+        filterItems(arr, bosses){
+            var items = []
+            for(let boss of bosses){
+                var last = 0
+                var remove = 0
+                if (["노멀 스우","노멀 데미안"].includes(boss)) last = 7;
+                else if (["노멀 가디언 엔젤 슬라임","이지 루시드", "이지 윌","노멀 루시드","노멀 윌"].includes(boss)) last = 8;
+                else if (["노멀 더스크","노멀 듄켈"].includes(boss)) last = 9;
+                else if (["하드 스우","하드 데미안","하드 루시드","하드 윌","노멀 진 힐라"].includes(boss)) last = 14;
+                else if (["카오스 가디언 엔젤 슬라임","카오스 더스크","하드 듄켈","하드 진 힐라","노멀 세렌","하드 세렌","검은 마법사"].includes(boss)) {
+                    last = 18;
+                    remove = 13;
+                }
+                var newArr = arr.slice(0, last)
+                newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
+                items = [...items, ...newArr]
             }
-            var newArr = arr.slice(0, last)
-            
-            newArr = remove > 0?newArr.filter(a => a != 'scroll'):newArr
-            return newArr
+            return [...new Set(items)]
         },
-        numChange(type, boss, item) {
+        numChange(type, group, item) {
             if (this.count) {
                 this.count = {
                     ...this.count,
-                    [boss]: {
-                        ...this.count[boss],
+                    [group]: {
+                        ...this.count[group],
                         [item]:
-                            this.count[boss][item] +
+                            this.count[group][item] +
                                 type >=
                                 0
-                                ? this.count[boss][
+                                ? this.count[group][
                                     item
                                 ] + type
                                 : 0,
@@ -401,6 +448,7 @@ var dist = new Vue({
             }
         },
         getUnit(n) {
+            n = parseInt(n)
             n = n.toString();
             var r = this.getReverse(n);
             var part = [];
@@ -421,37 +469,16 @@ var dist = new Vue({
             }
             return r;
         },
-        getTotal(arr) {
-            var total = 0;
-            for (let i of arr) {
-                total += this.total[i]?this.total[i]:0;
-            }
-            return this.getFormat(total);
-        },
         getFormat(n) {
             n = n.toString();
             return (Math.round(n / this.round) * this.round)
                 .toString()
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         },
-        getDiv(n, fee=this.fee) {
-            return (100-fee) / (100 * n - 5);
-        },
-        peopleChange(type, i) {
-            if (this.people) {
-                this.people = {
-                    ...this.people,
-                    [i]: this.people[i] + type >= 1
-                            ? this.people[i] + type
-                            : 1
-                };
-            }
-        },
         addeq() {
             this.eqs.push({
                 boss: "",
                 price: "",
-                num: "",
                 tag:
                     "장비" +
                     (this.eqs.reduce(
@@ -469,59 +496,109 @@ var dist = new Vue({
                 fee: this.fee
             });
         },
-        changeEqBoss(val, i){
-            this.eqs[i].num = this.people[val]?this.people[val]:this.eqs[i].num
-        },
         deleq(i) {
             this.eqs.splice(i, 1);
+            var myToast = Toastify({
+                text: "삭제되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
         },
-        changeEqIncludes() {
-            this.selected = []
-            this.rates = {}
-        },
-        toggle(k, i = "") {
-            if (this.selected.includes(k + i)) {
-                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
-            } else {
-                this.selected = this.selected.filter((a) => a.indexOf(k) < 0);
-                this.selected.push(k + i);
-            }
-        },
-        changeRateYn(key, type) {
-            if (type) {
-                if(this.rates[key]){
-                    this.rates = {
-                        ...this.rates,
-                        [key]: {
-                            ...this.rates[key],
-                            useYn: true
-                        }
+        getTotalEach(){
+            const total = {};
+            for(let group in this.groups){
+                //그룹별 수수료 제외 총합 계산
+                var sum = 0
+                if(!this.eqOnly){
+                    for(let item in this.count[group]){
+                        sum +=
+                        this.count[group][item] *
+                        (this.price[item] && this.price[item] !== ""
+                            ? this.price[item]
+                            : 0);
                     }
-                } else{
-                    this.rates = {
-                        ...this.rates,
-                        [key]: {
-                            useYn: true,
-                            rate: ["", ""],
-                            total: ""
-                        }
+                    sum = sum * (1 - this.fee)
+                }
+                
+                var thisEq = this.eqs.filter(a=>this.groups[group].boss.includes(a.boss))
+                for(let eq of thisEq){
+                    if(eq.price && eq.price != ""){
+                        sum += eq.price * (1 - eq.fee)
                     }
                 }
-            } else {
-                this.rates = {
-                    ...this.rates,
-                    [key]: {
-                        ...this.rates[key],
-                        useYn: false
-                    }
+
+                //파티원별 비율 계산
+                var rateObj = {}
+                var that = this
+                this.groups[group].people.forEach(a=>{
+                    rateObj[a] = that.realPeople[a].filter(b=>b.boss === that.groups[group].boss[0])[0].rate
+                })
+
+                //그룹별 분배금 계산, 총 분배금에 더하기
+                var totalByGroup = this.getRatedTotal(sum, rateObj, rateObj[this.chief])
+                for(let people in totalByGroup){
+                    if(total[people]) total[people] += totalByGroup[people]
+                    else total[people] = totalByGroup[people]
                 }
             }
+            this.totalEach = total
         },
-        getRatedTotal(sum, head, target = head) {
-            var memR = (100 - head)/(100 - (0.05 * head));
-            var targetR = target / (100 - head);
-            console.log(sum, head, target, memR, targetR)
-            return sum * memR * targetR;
+        getRatedTotal(sum, rateObj, chief) {
+            //sum: 수수료를 뗀 총합, rateObj: 비율 오브젝트, chief: 파티장의 비율
+            var total = {}
+            var rateArr = Object.values(rateObj)
+            var rateSum = rateArr.reduce((total, value)=>{
+                return total + (value != "rest" && value != "" ? parseFloat(value) : 0)
+            }, 0)
+            var rest = (100 - rateSum) / rateArr.filter(a=>a === "rest").length
+            chief = chief === 'rest'?rest:chief
+
+            //전체에서 파티원의 비율
+            var memR = (100 - chief)/(100 - (0.05 * chief));
+
+            for(let i in rateObj){
+                var target = 0
+                if(rateObj[i] === 'rest') target = rest
+                else target = rateObj[i]
+                total[i] = sum * memR * (target / (100 - chief))//파티원에서 target의 비율
+            }
+            return total;
+        },
+        saveResult(){
+            if(Object.keys(this.totalEach).length > 0){
+                const date = new Date(+new Date() + 3240 * 10000).toISOString().split("T")[0]
+                const time = new Date().toTimeString().split(" ")[0];
+    
+                var t = date + ' ' + time
+                this.saved = [...this.saved, {
+                    time: t.replace(/-/g, "").replace(/:/g, "").replace(/ /g, ""),
+                    val: this.totalEach
+                }]
+                localStorage["saved"] = JSON.stringify(this.saved);
+                var myToast = Toastify({
+                    text: "저장되었습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+            } else{
+                var myToast = Toastify({
+                    text: "결과가 없습니다.",
+                    duration: 3000
+                })
+                myToast.showToast();
+            }
+        },
+        deleteSaved(index){
+            this.saved.splice(index, 1)
+            localStorage["saved"] = JSON.stringify(this.saved);
+            var myToast = Toastify({
+                text: "삭제되었습니다.",
+                duration: 3000
+            })
+            myToast.showToast();
+        },
+        getDateFormat(val){
+            return val.substr(0,4) + '-' + val.substr(4,2) + '-' + val.substr(6,2) + ' ' + val.substr(8,2) + ':' + val.substr(10,2) + ':' + val.substr(12,2)
         }
     },
     created() {
@@ -534,8 +611,13 @@ var dist = new Vue({
         if (localStorage.getItem("price")) {
             this.price = JSON.parse(localStorage.getItem("price"));
         }
+        if (localStorage.getItem("chief")) {
+            this.chief = localStorage.getItem("chief");
+        }
         if (localStorage.getItem("people")) {
             this.people = JSON.parse(localStorage.getItem("people"));
+        } else{
+            this.reCount = true
         }
         if (localStorage.getItem("eqs")) {
             this.eqs = JSON.parse(localStorage.getItem("eqs"));
@@ -544,11 +626,14 @@ var dist = new Vue({
             this.round = JSON.parse(localStorage.getItem("round"));
         }
         if (localStorage.getItem("count")) {
+            this.reCount = false
             this.count = JSON.parse(localStorage.getItem("count"));
-        } /* else {
-            for (let i of this.boss) {
-                this.count[i] = this.resetCount(i);
-            }
-        } */
+        }
+        if (localStorage.getItem("saved")) {
+            this.saved = JSON.parse(localStorage.getItem("saved"));
+        }
     },
 });
+function inputfocus(){
+    this.children[0].children[0].children[0].children[1].children[1].focus()
+}
